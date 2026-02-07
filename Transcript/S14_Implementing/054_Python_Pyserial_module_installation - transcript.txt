@@ -1,0 +1,69 @@
+Hey, welcome back to the course and hope you have installed the python on your machine.
+
+And in this lecture, let's understand how we can install a pySerial Python library, which we have to use
+
+in order to communicate to with the target over the serial port.
+
+So, the pySerial python module will provide all the opening, reading, and writing a python functions for
+
+the serial port.
+
+So, for Windows it is very very simple.
+
+Just run this command that's it. Python -m pip, pip is a command in order to fetch those modules and
+
+install pySerial.
+
+So, now let's run this let's see what happens.
+
+I'm going to my command prompt and I'm just pasting that command,
+
+and hit enter,
+
+And here we can see it is saying that a requirement already satisfied.
+
+So, that means I have already installed it.
+
+So, that's why it is not going to install at again.
+
+So, for you it should install this module.
+
+That is pySerial OK. And if you are using Ubuntu just go ahead and type this command sudo apt-get install
+
+python3-serial.
+
+So, that should install the pySerial module.
+
+So, for Mac what have to do is, you have to first install the pip command.
+
+OK on to your machine. For that,
+
+Just run this command curl
+
+and give this path,
+
+in order to fetch that script that is get-pip.py and save it in your machine
+
+as get-pip.py.
+
+OK. So, you can do it anywhere you want just you execute this from your user directory
+
+OK.
+
+And after getting this script what have to do is, just run pseudo python
+
+get-pip.py.
+
+So, that means you just execute this script.
+
+Now, when this script executes it actually knows how to install the pip command on your machine and then just
+
+run sudo pip install pyserial.
+
+That's it.
+
+This should install the pyserial python module onto your machine.
+
+So, without this module you cannot run the host application so that's why you should install this.
+
+Great, I hope you will do that and I will see you in the next lecture.

@@ -1,0 +1,317 @@
+Now, let's say you want to add new
+
+command.
+
+So, what you have to do?
+
+So, first you have to define that command,
+
+and you have to select one unused command code for that.
+
+All right.
+
+And then go to main.h.
+
+Here is a bootloader commands and you add that command at the end.
+
+All right.
+
+So, for example, let's say #define COMMAND_BL_MY_NEW
+
+COMMAND. Now, let me give one command
+
+code for that, let's say 0x5D. Then you have to mention the command length.
+
+Sorry. All right. So, then you have to mention the command length here.
+
+Length details of the command.
+
+So, #define the length information you have to give.
+
+All right. Let's say 8.
+
+All right.
+
+So, I don't know what exactly is a length but let's say 8.
+
+So, you added the length.
+
+So, that's a second thing, that the step number 2.
+
+And then you have to you know go to the commands.
+
+So, in the decode_menu_command_code function you have to add one special case for that
+
+command. Will go at the end,
+
+let's say case.
+
+So, this is a last command
+
+of our project and you are new command has to come after this.
+
+So, what I suggest to you is, simply copy this existing one and paste it, and increment this case number
+
+to 14,
+
+and after that you have to use this code block in order to populate
+
+your command details.
+
+For example, for a time being let me remove this printfs. Here, first field will always be you
+
+know length information. So, you have to paste that length information by using your new command length. Isn't
+
+it?
+
+So, let's go to command.
+
+So, this is a length.
+
+So, in the length you replace your command length.
+
+All right.
+
+And this is a command code, second field in the command packet is always the command code. Isn't it?
+
+So, this is the command code.
+
+And if you have any other information in the command packet, then you have to use this data_buf.
+
+In order to fill that information OK, and for the CRC again replaced this length with your length.
+
+All right.
+
+So, this will be common.
+
+All right.
+
+So, this actually calls this actually converts 4 bytes CRC into bytes in little endian format.
+
+Great.
+
+Then you write that to serial port.
+
+So, while writing remember that, the first length field will be sent first.
+
+That is 1 byte this is a length field.
+
+This is the length field.
+
+All right.
+
+So, one byte will be sent first and then the remaining.
+
+So, we start from the second byte or second field of the common packet and then we send the rest. All
+
+right. So, here
+
+this must be my new command length.
+
+Then you read the bootloader reply.
+
+Now, let's go to the bootloader reply.
+
+Here is a implementation of that in the BlReplyProcessing.c.
+
+Now, let's explore this.
+
+So here, you have to add one case for your command.
+
+All right.
+
+So, let's add a new case.
+
+So, this is the new command and then you have to add one process function.
+
+All right. So, now let me copy this first and let me paste here.
+
+So, this is a function or helper function where that processing will be taken care.
+
+Now, let's change is process helper function.
+
+All right. So, I just copy this
+
+command name and let me paste here.
+
+All right.
+
+Great.
+
+So, what it means, when it comes to the read_bootloader_reply. So, first ack will be read and if ack is good. I
+
+mean if it is ask then we will read the reply of the bootloader.
+
+Right?
+
+So, that's why we go to the appropriate process
+
+handle function or helper function, in order to read the reply from the bootloader.
+
+All right.
+
+So, you have to implement this in this file.
+
+All right.
+
+So, somewhere here in the down.Here you can see,
+
+the lots of process bootloader reply helper functions for each command.
+
+Now, let's say I implement this process function here, somewhere here.
+
+All right.
+
+So, this must be
+
+let's say uint32 len. All
+
+right.
+
+So, here you have to read the reply from the bootloader.
+
+So, take an example of this.
+
+All right.
+
+So, here I am reading by using read_serial_port.
+
+So, here I'm reading length bytes.
+
+Similar thing you have to do according to your command and it's to reply behavior.
+
+All right.
+
+And don't forget to add the prototype of this function in main.h.
+
+All right.
+
+So, in the main.h you can see here bootloader reply process prototypes. So, just add here.
+
+So, now let's try to build this project let's see whether it builds or not.
+
+Let's first build.
+
+All right.
+
+So, there are some problem.
+
+OK. Let's build this.
+
+OK. So, there are some problem here.
+
+OK. So.
+
+this is uint32_t.
+
+Sorry.
+
+All right.
+
+So, now it build successfully.
+
+And now let's launch, run and here we can see that this menu is not showing your new command. Isn't it?
+
+So, we have to add that command into the menu also.
+
+So, for that go to main.c and here you have to add that entry.
+
+So,let's copy this last command and paste it.
+
+All right. So, what is a our command? Name
+
+this one. Right?
+
+COMMAND_BL_MY_NEW_COMMAND.
+
+So, let's go to main.c,
+
+and let's add in the menu.
+
+OK.
+
+So, let's say this is 14. All right. Now, when you enter 14, that will be decoded by decode menu
+
+command function.
+
+All right. So, it will come to 14
+
+here.Where is 14?
+
+It will come here and you can put some printf statement here.
+
+So,let's say this is this command my new command and you prepare your data buffer, that is you prepare
+
+the command bytes,command packet bytes, then you write. And then you immediately go to read_bootloader_reply,
+
+and then you first read the ack here, 2 bytes of ack.
+
+So,that's why, I call read_serial_port with 2 bytes and if it is really the ack then we go and read
+
+the length here.
+
+So, here we can read the CRC of last command was good.. received ACK
+
+and "len to follow". So, the second field what we receive with the ACK is nothing but length to follow.
+
+So, that's why, length to follow must be copied and should be passed to the individual bootloader process
+
+handle functions.
+
+All right.
+
+So, we actually go here. Then we go here actually.
+
+All right.So,
+
+and here you have to read these many bytes and you have to print according to the reply.
+
+Let now let's build this, run and here we can see new
+
+command is appeared here.
+
+And if I type 14, and there is actually no response from the bootloader because, the handle function
+
+the bootloader handle function in your firmware is not yet implemented.
+
+Now, you have to implement handle function for this in the bootloader project also.
+
+All right.
+
+So, for example, if I go to my bootloader project.
+
+So, this is a bootloader project.
+
+First you have to go to the main.h.
+
+All right.
+
+So, first you have to go to the main.h and in the main.h you have to add that new command
+
+here.
+
+And after that go to main.c, and in the main.c
+
+here you have to add a handle function for your command.
+
+All right.
+
+So, you can add at the end, you can add after this command.And then you implement that handle function.
+
+So, what that command needs to be done.
+
+You have to implement that logic and then you reply the result back to the host.
+
+So, you should take the help of these already implemented handle function. To see, how to implement your
+
+own handle function for your new command.
+
+All right.
+
+Great.
+
+So, that's about adding new command to the project.
+
+If you ever want to do that so you can take these tips,
+
+and I think you should be able to add new command and let me know if you face any issues.

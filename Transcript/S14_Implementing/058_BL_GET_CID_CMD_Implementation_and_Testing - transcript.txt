@@ -1,0 +1,155 @@
+Hey, welcome back to the course.
+
+So, now we have to implement our third
+
+command, that is get chip identification number.
+
+So, this command is used to read the MCU chip identification number or device identifier.
+
+So, now let's see how to implement this functionality in our bootloader.
+
+So, here I have written a small function to read the chip identification number or device identifier.
+
+You can also call like that.
+
+So, the STM32F446xx MCUs integrate an MCU ID code. This ID identifies
+
+the ST MCU part number and the die revision.
+
+It is the part of the DBG_ MCU component.
+
+So, now let's understand this.
+
+So, what basically they are saying is, let's go to the reference manual of the microcontroller.
+
+And here in the section MCU device ID code in this section.
+
+So, what basically they are saying is the MCUs from ST integrate an MCU ID code.
+
+That means, there is one register which holds the MCU identification number.
+
+Now, this ID identifies the ST MCU part number and the dire revision.
+
+So, this is the name of that register which is at this address. So, this register is of 32 bits
+
+and here are the details.
+
+So, 0 to 11 bits
+
+they describe the device identifier.
+
+That means, the device identifier number is stored at these bit locations.
+
+So, now the Device ID for this particular microcontroller is 421. For some other microcontroller
+
+it may be different.
+
+All right. So, for
+
+STM32F446xx
+
+family based MCUs it is 421, and bit 16 to 31
+
+they represent the revision identifier and if it is 0x1000 then this is revision 8.
+
+All right.
+
+Great.
+
+So, now our job is to read this register in order to obtain this device identifier. So, output must be
+
+0x421.
+
+Now, let's see how we can do this. Now, as I said this register is part of the debug component of the
+
+microcontroller and lets see, how we can implement the code for that.
+
+So, here is a code.
+
+All right.
+
+So, let me just open this in
+
+Keil, here it is.
+
+I am dereferencing the debug MCU structure of the microcontroller. So, this is actually #defined to
+
+this address.
+
+All right.
+
+So, this is actually defined in STM32F446xx.h,
+
+and this is defined to this address,
+
+and if you check what exactly this address is, here it is. This address is this one. So,that exactly
+
+matches with this number. Isn't it?
+
+Now, that address is type casted to this structure type structure pointer type. Right?
+
+So, this structure lets see what is this structure.
+
+So, this structure has some member elements all are 32 bit registers
+
+actually. The first register is IDCODE that is this one IDCODE, and that actually holds MCU device ID
+
+code.
+
+So, that means we have to read this register now.
+
+All right. So, that's what done here.
+
+So, we are dereferencing that address and we are reading the IDCODE register. And then I am just masking
+
+other bits, because we are only interested in 0 to
+
+11 OK. So, because that is the device identifier.
+
+And then this function, this is a small helper function which returns that ID.
+
+Now, lets see how the handle function is implemented.
+
+So, here is a handle function bootloader_handle_getcid.
+
+Let me open this in my code block and after sending the ack, here we are reading that chip identification
+
+number and then bootloader sends that as a reply back to the host.
+
+All right. So, it sends 2 bytes.
+
+Now, let's go to Keil, let's compile and let's test this.
+
+Let me launch my host application, host application is ready and let me reset the board.
+
+All right. So, now let me just type the code 3. 3 is for GET_CID and here it is the CRC is success,
+
+the chip identification number is 421.
+
+Right? So, the bootloader successfully read that register and it replied back to the host.
+
+You can even modify this command to read the revision number also.Here,
+
+you can do that.
+
+OK.So, that I have not implemented,
+
+you can change this code or you can add a new command in order to read the revision identifier.
+
+Now ,our next job is BL_GET_RDP_STATUS.
+
+That is read protection status or read protection
+
+level.
+
+So, this command is actually used to read the Flash read protection level.
+
+Now, we will discuss more on this in the next lecture. First we'll explore what exactly is RDP
+
+level or RDP status,
+
+and then we'll try to implement that.
+
+After that, we will implement all this commands. Great.
+
+I'll see you in the next lecture.

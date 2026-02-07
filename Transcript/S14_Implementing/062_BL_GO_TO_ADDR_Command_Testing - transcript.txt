@@ -1,0 +1,153 @@
+The compilation is successful.
+
+And now let's download the code and let me just keep the board into bootloader mode.
+
+And do you want to continue?
+
+Yes.
+
+All right.
+
+So, the go to address is command code is 5.
+
+So, let me just type 5 and you have to enter the address
+
+now. So, host is asking to which address you want to jump and let me give some peripheral address, let's
+
+say 0x40000000.
+
+Now, let's see what happens.
+
+So, now here the address status is 1.
+
+So, address status 1 means it's a invalid address.
+
+All right. So, now let me type yes here, and let me try once again, now
+
+let me jump to 0x08000000. So, this is a base address of the flash. Isn't it?
+
+So, now you can see here the address status is 0.
+
+All right.
+
+That's a valid address.
+
+Great.
+
+So, now let's jump to some application in order to execute that.
+
+All right.
+
+Now, as you know that we have our user application, which we created in our previous lecture.
+
+So, this is our user application.
+
+This application toggles the LED whenever I press the button as well as it print some data,
+
+Hello from user application on to the virtual COM port. Isn't it?
+
+So, now we also stored this code in the sector 2.So, sector 2 starts from this address 0x8008000.
+
+So, now this is already stored in our flash. Isn't it?
+
+So, now let's jump to the reset handler of this application in order to trigger the execution of this
+
+application.
+
+For that,we have to know the address of the reset handler. Isn't it?
+
+So, now let me just download this code
+
+and let me just go into the debug mode.
+
+All right.
+
+So, now if you just go to the memory window.
+
+So, this is the base address of the sector 2,
+
+and so this is the MSP value and this is the address of the reset handler. Isn't it?
+
+So, if we jump here then we are able to execute this application. Isn't it?
+
+Great.
+
+So, now let's copy this address.
+
+All right.
+
+So, now let me just hey somewhere, sorry 0x080081D9.
+
+Right?
+
+So, or you can say D8.
+
+All right. So, now we go back to our host application and let's type yes here.
+
+Now, command code 5 and 0x080081D8.
+
+This is the address of the reset handler of the user application.
+
+So, now let's hit enter and now it is saying time out.
+
+All right.
+
+So, that's because my bootloader is not running.
+
+Let me reset the board.
+
+All right.Now, let's try once again
+
+81D8. Now, let's hit enter and the address status is 0.
+
+That means, it's a valid address.
+
+Now, our application has to be running. Isn't it?
+
+Now, will verify that.
+
+So, our application must be printing now some data on to the virtual COM port.
+
+So, for a time being I will just close this host application and let me open the TeraTerm to see
+
+whether user application is indeed running or not.
+
+So, let me just set up the baud rate and here it is. The user application is indeed running and my interrupt
+
+is also working.
+
+Even ever I press the user button, the LED is toggling. That means we indeed able to jump to the user
+
+application which is stored in the sector 2.
+
+That's the use case of the go to address command.
+
+You store some code on to different memories like you may be having code in the RAM, SRAM1, SRAM2,
+
+in the backup SRAM, in the external memory,or in the Flash on different sectors. Than host can ask
+
+the bootloader to jump to those codes in order to execute that.
+
+All right.
+
+So, that's the demonstration of this
+
+command.
+
+Great.
+
+So, try this at your desk and let me know if you face any issues.
+
+And our next command is bootloader flash erase.
+
+So, this command is used to erase a given sector of the flash memory or you can even use this command
+
+in order to mass erase the flash memory.
+
+That means, erase all the sectors of the flash in one go.
+
+So, let's see how we can implement this
+
+and for this we use driver APIs from the flash driver of the ST's hardware abstraction layer.
+
+Will see how to implement this in the next lecture.

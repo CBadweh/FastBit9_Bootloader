@@ -1,0 +1,133 @@
+All right.
+
+So, now let me just compile this code
+
+first. Download this code and let me reset my board.
+
+So, now let me send the command code 4.
+
+All right.
+
+So, that is for
+
+get_rdp_status and here it is.
+
+I'm getting the RDP status as AA.
+
+So, that means we are in level 0.
+
+Now, I can change it to level 1,
+
+no problem.
+
+But, I will never change it to level 2.
+
+Now, if I change it to level 1 and if I want to go back to level 0, then the whole flash memory will be
+
+erased. That we can try,
+
+I mean you can add a command to do that.
+
+I mean, to switch the RDP levels like from going from level 0 to level 1 or from level 1 to
+
+level 0.
+
+I have not added that command.
+
+So, it's only read RDP not change RDP.
+
+Now, what I do is, I open my ST-Link utility and I read that address. First, I connect and then I read this
+
+address.
+
+OK. So, when I read this address here I can see AA.
+
+Right?
+
+the second byte. This option bytes window you can use to change the readout protection.
+
+All right.
+
+So, you can switch between different levels.
+
+So, as I said don't go to level 2.
+
+And if you make it as level 1 and if you go back to level 0, then it will be problem.
+
+OK. So, the action of going back to level 0 from level 1 will mass erase entire chip and you can do
+
+other sector settings here.
+
+All right.
+
+For a time being I don't want to use it,
+
+and here it is saying that the second byte is indeed A, and that's what we read with the help of the
+
+bootloader.
+
+Right?
+
+So, that means we have successfully implemented our get_rdp_status command.
+
+Now, let me show you one more implementation of that, flash RDP level.
+
+So, you can also use the APIs provided by the flash driver of the ST hardware abstraction layer.
+
+Here, we can see that flash_extension.c and flash.c.
+
+So, these 2 are flash drivers.
+
+That means, they deal with the flash memory internal flash memory as well as external flash memory,
+
+if it is interfaced. And these 2 driver files they give lots of APIs in order to handle the flash memory.
+
+So, in this implementation I have used function called HAL_FLASHEx _OBGetConfig. OB means option bytes.
+
+And for this you have to send the address of the flash handle variable.
+
+This API is implemented in flash_extension.c.
+
+And here we can read that, get the option byte configuration and it returns all these information. Not
+
+only the RDP level but also the user configuration details. The other details like BOR level and write
+
+protection status of different sectors.
+
+And we are interested in Get RDP level it calls this function and here it is. This function then actually
+
+goes and read the our address we just read in our application.
+
+All right.
+
+So, you can also use these flash APIs of the ST's library or driver file in order to get your job
+
+done.
+
+And this is a structure which will be populated by that API.
+
+So, at one go you will get all these information.Great. So, now that's about get RDP level command. And in
+
+the next lecture, we will explore the next one that is the BL_GO_TO_ADDR
+
+command.
+
+So, the host uses this command to instruct the bootloader to jump to specified address. That address can
+
+be RAM address, it can be Flash address or whatever.
+
+So, the bootloader has to jump to that address.
+
+We will test this command by jumping to sector 2.
+
+So, you know that we have already stored a user application in sector 2. Isn't it?
+
+So, we will use go to command in order to instruct the bootloader to jump to this location.
+
+So, when that command is executed that is go to address.
+
+We should see our application running on the microcontroller.
+
+Will see how to implement that.
+
+OK. I will see you in the next lecture.

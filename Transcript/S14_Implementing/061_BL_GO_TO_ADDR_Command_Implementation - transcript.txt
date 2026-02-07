@@ -1,0 +1,127 @@
+In this lecture, we are going to implement bootloader handle go command or go to address command. All right.
+
+So, this is the handle function and this is the code implementation.
+
+Now, let me explain this code to you.
+
+The host sends the memory address to which a bootloader has to jump.
+
+So, that is given in the third field, that is 4 bytes of address of the code or whatever to jump. And
+
+in the code,
+
+after the CRC verification first we send Ack that you know already.
+
+All right.
+
+So, send the Ack.
+
+And after that extract the address.
+
+So, here we extract the 32 bit or 4 bytes of address and after that, that address has to be verified.
+
+Because, the bootloader cannot jump to all the addresses.
+
+Right?
+
+That is restricted. Because we can only jump to RAM location,
+
+we can only jump to the user flash locations or you can only jump to the external memory locations in
+
+order to execute some code. Isn't it?
+
+So.
+
+So, you cannot jump to let's say peripheral memory region in order to execute instructions.
+
+That's not possible.
+
+That's not allowed by the Cortex M processor.
+
+And if you try to do that, then you will end up having some exceptions.
+
+So, that's why we have to verify that address.So, that verify address,
+
+I have implemented here it's a very simple code and here it is. So, can we jump to system memory?
+
+Yes.
+
+Can we jump to SRAM 1 memory?
+
+Yes. We can jump to SRAM 2 memory,
+
+we can even jump to backup SRAM, and we can even jump to external memory, but we cannot jump to peripheral
+
+memory.
+
+That's why, this code verify address.
+
+Just checks this go to address.
+
+All right.
+
+Against some allowed memory addresses like SRAM1_BASE, SRAM2_BASE, FLASH_BASE, BKPSRAM_BASE,
+
+etc..
+
+And if that address is within the allowed range,then this verify address returns address valid
+
+Otherwise, it returns address invalid. All
+
+right.
+
+So, all these macros I have included in main.h here it is. These are some start and end addresses of different
+
+memories of the STM32F446 microcontroller and this maybe different.
+
+So, you have to change according to your microcontroller.
+
+All right.
+
+So, now let's go back to our handle function.
+
+So,in the handle function if the address is valid we tell the host that address is fine.
+
+OK.Then we jump to the "go" address. So, we don't care what is being done there, host must to ensure
+
+that valid code is present over there. That means where it is instructing the bootloader to jump.
+
+So, it's not the duty of bootloader.
+
+So, we just trust and jump. All right.
+
+Now, the go to address has to be incremented by 1 in order to make T bit as 1 in ARM Cortex M based
+
+processors.
+
+So, you can watch this video in order to understand that. Why?
+
+All right.
+
+So, T bit has to be 1, whenever you are executing thum instructions on ARM Cortex M processor.
+
+And the last bit that is 0th bit of the program counter is treated as 30 bit.
+
+Now, after that we just initialize this function pointer to this address.
+
+What we received from the host,
+
+and then we just jump. That's it.
+
+And if the address is invalid, then we come to the else part here and we will tell the host that the
+
+address is invalid.
+
+OK. By sending this error code that is address invalid error code.
+
+Great.
+
+So, now let's test this.
+
+So, in the first case what will do is. We will try to jump to some invalid address and let's see how our
+
+bootloader behaves.
+
+Great.
+
+So, now let me just compile this code.

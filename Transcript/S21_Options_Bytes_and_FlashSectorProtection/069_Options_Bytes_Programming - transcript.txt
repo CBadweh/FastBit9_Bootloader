@@ -1,0 +1,459 @@
+Hey, welcome back to the course.Now, before going to our next command let's understand some theory OK.
+
+In this lecture, we are going to understand the write protection and read protection on these sectors of
+
+the main flash memory. As you know we have 8 sectors and all sectors are by default are not protected.
+
+In the sector 0 as well as in the sector 1
+
+you actually store the bootloader code.
+
+And you don't want to erase that bootloader accidentally or you may think that OK, someone should not
+
+even read it.
+
+All right.
+
+So, in those cases you can put restriction on different sectors and you can configure those protections.
+
+In the previous lecture, in the option bytes
+
+we explored this, isn't it? The read protection option byte.
+
+And if this level is 0, then there is no protection on the entire software code stored in the flash
+
+memory. So, this level applicable to the whole user flash memory. So, you can apply protection to the
+
+individual sectors.
+
+So, that's what we are going to learn in this lecture.
+
+Again all this protection related configurations you have to do it in option bytes.
+
+Now, let's explore this table of a option bytes and just go down,
+
+and here you will see the configuration of protections for individual sectors here it is.
+
+So, this is in the address this one.
+
+All right.
+
+So, in this address so the first 8 bits are to put protection configuration on individual sectors.
+
+There are 8 sectors,
+
+that's why 8 bits are reserved for this purpose.
+
+In some other microcontroller, if it has more sectors than you may find more configuration bits.
+
+Now, just read the description over here. If SPRMOD is reset, SPRMODE is nothing but this bit 15th bit.
+
+So, if this bit is reset that's the default state, then making any of these bits 0 will put write
+
+protection on that sector.
+
+And if you make any of these bit as 1 the relative sector will not be protected, will not be write
+
+protected.
+
+So,0 means write protection and 1 means it's not write protected.
+
+It's like that.
+
+All right.
+
+And if this SPRMOD bit is set, so then 0 means PCROP protection. So, PCROP protection means
+
+read and write protection.
+
+So, you can read here. So, SPRMOD means selection of protection mode of nWPRi bits. So,
+
+nWPRi bits are here.All right.
+
+So, if this bit is 0, then nWPRi bits used for sector i write protection, whereas if this bit is 1
+
+then nWPRi bits used for sector i PCROP protection.
+
+So, what is PCROP protection? So, let's explore.
+
+So, that is also mentioned here. So, just browse down and you will see the definition of that.
+
+All right.
+
+So, let's go down and here it is proprietary code readout protection.
+
+So, that means you are actually putting read restriction on that particular sector.
+
+So, for example, if you are using debugger to read that sector contents, then it will not be possible
+
+if you put PCROP restriction. That is proprietary code read out protection.All right.Now, let's go to that
+
+table.
+
+OK. So, that means this SPRMOD bit decides whether you're sectors are write protected or PCROP
+
+protected,
+
+that is read protected.
+
+All right.
+
+So, if this bit is 0,
+
+then these conditions will apply and if that bit is 1, then these conditions will apply.
+
+So, now how to program these bits. Now, for that
+
+again you have to refer guidelines described in your reference manual.
+
+All right. So, you have to read this.
+
+So, here is a procedure. So, to modify the user option value, follow the sequence below.
+
+Now, check that no flash operation is ongoing by checking the BSY bit in the flash status register.
+
+Write
+
+the desired option value in the FLASH_OPTCR register.
+
+So, this is very very important because you should not modify these addresses remember.
+
+So, you can read it.
+
+So, in the previous lecture what we did, we read this address. Isn't it? To get this level value.
+
+You can do that no problem. But, if you want to change the level or if you want to change the user option
+
+bytes remember you should not modify this address,
+
+that's not possible.
+
+All right.
+
+So, these are not writable addresses.
+
+So, that's why here they are clearly saying that, write
+
+the desired option value in the FLASH_OPTCR register. Now,
+
+will take a look into that registry in a moment.
+
+Don't worry.
+
+Now, set the option start bit in the FLASH_OPTCR register,
+
+and then again wait for the BSY bit to be cleared.
+
+Now, we have to explore this flash OPTCR register. Now, for that just go to your flash section and
+
+here is a register FLASH_OPTCR, that is flash option control register and you have to read here that
+
+the reset value is this one.
+
+OK.
+
+The reset value is not 0, and the option bits are loaded with the values from the Flash memory at
+
+reset release.
+
+And here it is.
+
+Here is the SPRMOD bit and these are the individual sector configurable bits.
+
+That is nWRP.
+
+All right. So, you have to use these bits in order to put read or write protection on the individual
+
+sectors.
+
+And this will decide whether it's a read protection or the write protection.
+
+Great.
+
+So, now we have to use this register in our work.
+
+All right.
+
+Great.
+
+So, now with this background you should be able to implement our next command that is enable/disable a
+
+read write protect.
+
+Before that let me give you a demonstration of this by using ST_LINK utility. So, let's say I have a
+
+board now connected to my PC.
+
+All right.
+
+So, now let me just open my ST-LINK utility and let me just connect to my board.
+
+All right.
+
+So, it is connected.
+
+All right.
+
+So, this is the sector 0
+
+and you can see the codes here.
+
+And if I go to sector 1 and yes, there are so some code. And if I go to sector 3 there are no codes,
+
+no problem. Fine.
+
+So, now what I do is, I open the option bytes option here.
+
+Here.
+
+All right.
+
+So, this will read the status the current status of the option bytes. Now,
+
+here we can see the readout
+
+protection is level 0.
+
+That's fine.
+
+That is by default
+
+and here we can see that all sectors are not protected, no protection by default.
+
+Now, let's put write protection.
+
+All right. So, now let me just check these two.
+
+Now, later you have to do this by using your own command bootloader command.
+
+So, I'm just demonstrating you by using ST's software.Here,
+
+I have checked these two options.
+
+Now, it is saying that it is write protected.
+
+And then you have to click Apply button.
+
+So, apply button I'm not able to show this is actually hidden here.
+
+So, there is a apply button. But, since for recording purpose
+
+I have kept Udemy is recommended resolution or at screen resolution, which actually prevents this software
+
+to show that option.
+
+For you, you should see apply button here.
+
+So, you have to press that apply button.
+
+So, now let me do that.
+
+I just use the tab key.
+
+All right.
+
+So, now I'm going to apply.
+
+I'm going to press enter and here you can see that,
+
+now these two sectors are now write protected.
+
+So, now let's go and read the option bytes once again.
+
+And here we can see that write protection is currently active.
+
+Great.
+
+Now, let me just disconnect and
+
+now let me try to download, the Keil is throwing error.
+
+Why?
+
+Because, it couldn't able to touch that sectors because it is write protected.
+
+So, you cannot be able to download the code now.
+
+So,now let's again connect back and now let's read the option byte once again and
+
+now let's remove this protection.
+
+All right. Let's apply.
+
+All right.
+
+So, now the write protection is removed,
+
+disconnect and try to download.
+
+Yes, it works. I
+
+again connect back and again read the option bytes, and now this time I put read/write protection.
+
+So, what we just saw here proprietary code readout protection.That is this one PCROP.
+
+Now, PCROP is enabled. So, read as well as write.All right. So, now let's apply.
+
+So, here you can see now you cannot even read this code.OK.
+
+It is everywhere it is showing these numbers.
+
+So, these numbers. I'm not able to read what exactly is the contents of those sectors. Here also you can
+
+see the same thing.
+
+All right.
+
+So, everywhere it is these numbers.
+
+OK. So, now let's disconnect and let's try to download,
+
+now it don't work. Because, the read as well as write protection is active.
+
+Great.
+
+And let's connect.
+
+Let's read the option bytes and here is one important thing you must understand. If I want to disable
+
+this read and write protection that is PCROP. That is PCROP protection
+
+It is not that simple.
+
+Now, if I want to change this protection level than what the flash controller does is, it will mass erase
+
+the whole user flash.
+
+So, that means if you want to go back from read/write protection to some other protection level like
+
+write protection or no protection, then the entire flash memory will be mass erased.
+
+Now, I will hit apply and here it is. It is throwing this warning disabling of SPRMOD and read protection
+
+of user flash sectors will generate a full chip erase.
+
+So, that means the whole chip will be erased now.
+
+So, now we lost all the contents of the user flash
+
+now. Here you can see every where it is erased.
+
+Now, it is entirely blank.
+
+All right. So, now you have to reprogram it. Now,let's read the option bytes and it is now went
+
+into the default state.
+
+OK. So, now in the next lecture what we're going to do is. We are going to use these 3 command.
+
+So, the first command is bootloader enable read/write protection.
+
+The second command is bootloader
+
+disable read/write protection.And the third command is bootloader read sector protection status.
+
+I will show you the implementation of enable read/write protection and the disable read/write
+
+protection. And the read sector protection status
+
+you have to implement on your own and you have to read the current protection status of the sectors.
+
+For example, it should looks something like this.
+
+If you open the ST's software, how do you read the protection status of the sectors you just go and open the
+
+option bytes.
+
+Right? So, this operation is actually reading the protection status of the different sectors. Isn't it?
+
+So, something similar
+
+you have to implement, something like this.
+
+Now, I will show you how that looks like.
+
+All right. So, I will just take you to the host application.
+
+Now, I'll just reset my board and my bootloader code must be running.
+
+So, now here is the command read sectors protection status.
+
+All right. So, the command code is 11.
+
+Let me type 11 and here it is.
+
+This is the output that my implementation is reading
+
+the status of all the sectors. All right.So, something similar to this one.
+
+Something similar to this one.All right.
+
+Now, what I do is, I just change some of the option bytes.
+
+Let me just connect and go to option bytes.And
+
+Now, let me put write protection on these two and these two.
+
+All right.
+
+Now, let me click apply.
+
+OK. So, now it is write protected.
+
+You can see here 0, 1, 6, 7.
+
+All right. Great.So,
+
+now let's check with our command 11.
+
+That is to read the sector protection status. OK.
+
+All right. So, it is not responding because after programming the option bytes through ST's software you have to again
+
+restart it.
+
+All right. So, now let's press any key to continue,
+
+and let me just put the command code 11 and here it is. So, now my command is also properly reading the
+
+current status of the sectors.
+
+So, these 4 sectors are write protected.
+
+All right.
+
+So, let's check that once again.
+
+Now, let me clear those protection, unselect all.
+
+All right.
+
+And put
+
+and check sector 3, sector 4 and put read/write protection.
+
+Now, let's check by reading the status 11
+
+and here it is read/write protection.
+
+So, what's happening here.
+
+So, I have implemented read sector status command in the bootloader.
+
+That is a handle function.
+
+When I send that command to the bootloader from host bootloader just goes and it reads status of
+
+this register. And it actually gives the contents of these bits as well as these bits.Back to the
+
+host and then host decodes these information and it just prints in a nice readable format.
+
+That's it.
+
+All right.
+
+So, this you have to implement. And in the next lecture we will see how we can implement enable read/write
+
+protection on the sector as well as disable read/write protection on the sectors.
+
+I will see you in the next lecture.

@@ -1,0 +1,179 @@
+Hey, welcome back to the course and in the previous lecture you used a python application in order to
+
+run the very first command. That is BL_GET_VER command
+
+and you also got the reply, isn't it?
+
+So, now in this lecture let's debug the bootloader project to see all the execution steps, which is involved in executing
+
+the BL_GET_VER command and getting back the reply.
+
+OK.So, now what will do is, we will enter into the debug mode and then we will debug step by step.
+
+Keep the board into debug mode to see whether we really receive the command sent by the host or not.
+
+And now what I do is, I just go to the bootloader_uart_read_data and I press the user button first
+
+of the board, and then I reset my board, and then I hit run.
+
+So, now here you we can see that the control came to bootloader_uart_read_data.
+
+So, if you don't press the user button then it will go to user bootloader_jump_to_user_app.
+
+So, you can check that.
+
+So, you can once again reset and run.
+
+So, here it is. It came to bootloader_jump_to_user_app.
+
+So, we don't want to do that,
+
+we want to come over here, isn't it?
+
+So, I once again press and hold the user button, then I reset the board, then hit run.
+
+So, now the control came to uart_read_data.
+
+Now, let's go to this function and this is the code we have implemented, right?
+
+So, what I do is, I just keep a break point here.
+
+And let's hit run.
+
+And now the code is waiting for the uart data. isn't it?
+
+So, once the data is received this break point will be hit. The data will only be received when I send something
+
+from the host.
+
+So, now I press 1, that is the command code to send the BL_GET_VER command. And now I
+
+hit enter and this window says that, this is the BL_GET_VER command and it actually sent the command.
+
+All right.
+
+So, these are the contents of the command packet 0x05 is the length, that is the first byte
+
+which is sent from the host.
+
+And these are the remaining bytes of the command packet.
+
+For example,0x51 is the command code for this command.
+
+And these last 4 bytes are the CRC, 32 bit CRC.
+
+Now, this is saying that it's a timeout.
+
+Why?
+
+Because, we have kept the break point here. Isn't it?
+
+So, here we can see the breakpoint is hit.
+
+So, now the code is halted, right?
+
+So, that's why the host is saying timeout.
+
+I mean, I have given some timeout information there.
+
+So, no response from the bootloader reset the board and try again.
+
+That's fine. Because we are actually halted here.
+
+All right.
+
+So, now the code is here. Right?
+
+So,now what is the contents of the bl_rx_buffer you can see here.The contents of the bl_rx_buffer
+
+of 0 is 0x05.
+
+That's true.
+
+That's what we sent here.
+
+Isn't it? 0x05.
+
+Great.
+
+So, now what will do is, now let's keep the break point here. So, that we execute
+
+both uart receive functions.
+
+So, now what I do is, I just reset the board and I press and hold the user button and then hit run. Fine.
+
+Now, the board is now the code is actually waiting for the data
+
+in the uart.
+
+So, now let's go to our host and here,
+
+Do you want to continue?
+
+Let's press yes.
+
+And it gives the menus once again and here let's again press 1 and here it is. This break point is hit now. Isn't
+
+it?
+
+So, that means we have received full data bytes that is command packet bytes in the bl_rx
+
+buffer.
+
+Now, we can verify that.
+
+Now, let me open my watch window.
+
+So, here is a watch window.
+
+All right.
+
+Now, let me just drag and drop this here.
+
+Here it is. The first byte is 0x05.
+
+So, that's what we sent 0x05.
+
+Second one is 51, E7, E9, 51E7,E9 ,AP and 7C.
+
+Right?
+
+So , that means we indeed received the whole packet. Right? here.
+
+So, now next thing is it should come here because, it's get version command.
+
+Now, let's see whether it happens or not.
+
+Yes. It indeed came to bootloader handle get version command.
+
+All right. So, now let's remove this break point and let's do the single step and we entered the bootloader
+
+handle version command.
+
+Now, let's see whether the CRC verifies or not.
+
+So, now let me just keep a break point here and let me just hit run,
+
+and now it is about to enter into the verify CRC function that is this one.
+
+Right?
+
+And let me keep a break point here as well as here.
+
+Let's see, whether it is the success or failure.
+
+Now, let me hit run and here it is.It is actually success.
+
+Now, let me hit single step and we actually verified the CRC.
+
+Right?
+
+And then, it sends the ack and then it executes the get_bootloader_version, in order to get the
+
+bootloader version number and then it writes that into the uart in order to send it as a reply to
+
+the host.
+
+Great.
+
+Now, I will see in the next lecture and test this at your desk and let me know if you face any issues.

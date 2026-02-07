@@ -1,0 +1,105 @@
+Hey, welcome back to the course and in the previous lecture we have successfully implemented our first
+
+command. Right?
+
+That is BL_GET_VER command.
+
+Now, in this lecture let's implement the handle function for bootloader handle
+
+get help
+
+command.
+
+All right.
+
+So, now let me go to this function.
+
+All right.
+
+So, this is a function and here bootloader sends out all supported
+
+command codes to the host.
+
+So, this command is used to know what are the commands supported by the bootloader. So, bootloader reply
+
+will be all supported
+
+command codes.
+
+All right.So, now let's implement this handle function,
+
+I'll just show you the code for that.
+
+So, here is the code for that.
+
+All right.
+
+So, all these things you already know that it's extracting the whole CRC and calculating the comand
+
+packet length.
+
+Then we call the bootloader verify CRC.
+
+So, this line has no change.
+
+OK. It will be same across all the handle functions.
+
+And here, we are sending the reply to the host with the supported command list.
+
+So, this is a global variable where I have maintained the supported command codes of the bootloader.
+
+OK.
+
+So, this is a global array.
+
+Let's go there,
+
+here it is. In the global space I have just declared this array variable and I have just initialized that
+
+2 different command codes.
+
+That's it.
+
+It's a very simple code
+
+and now let me test this.
+
+All right.
+
+Now, let me go back to my Keil, now let's compile this code.
+
+All right. So, now let's download.
+
+All right. So, now let me just open my host application and now let me just type the command code 1.
+
+Yes, it's a version the bootloader version and now type yes.
+
+And this time I will give the command code 2, which is get help.
+
+Let's see what happens, here it is. Bootloader replied with all the supported commands list the
+
+0x51 to 5a.
+
+So, you can have more command codes to this list no problem.
+
+All right.Here,
+
+when it was sending the ack, it sends the ack along with how many bytes it is going to send next in the
+
+reply.Right? So,
+
+that's why I have used the sizeof supported commands.
+
+OK.So, then it replies by calling bootloader
+
+uart_write
+
+data function.
+
+All right.
+
+So, we have also tested the BL_GET_HELP
+
+command. Now, let's see what is bootloader
+
+GET_CID. That is chip identification number that is of 2 bytes. I will see you in the next lecture.

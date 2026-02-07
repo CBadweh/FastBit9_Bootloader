@@ -1,0 +1,335 @@
+Hey, welcome back to the lecture.
+
+And in the previous lecture, you understood about the host and bootloader communication.
+
+We will discuss more on this in the implementation part
+
+also, don't worry about that.
+
+And in this lecture,
+
+Let's see what are the formats of the commands that we send from the host to the bootloader.
+
+Here, is the command packet format for the command bootloader get version.
+
+So, the host sents this
+
+command in order to get the bootloader version.
+
+So, remember that in our implementation in every command packet. The first byte will be the length to
+
+follow field.
+
+And the second field, that is the second byte will be the command code of that respective command, that
+
+is sent by the host to the bootloader. And our project will also use CRC code of 4 bytes in order to
+
+help bootloader to check the integrity of the bytes received from the host.
+
+So, in this particular command that is PL get version, the total bytes of the packet will be 6
+
+bytes.
+
+So, 4+1+1+4 .Right?
+
+And the length to follow field will contain the value 5, and the command code will be 0x51 for this
+
+command.
+
+And the reply sent by the bootloader for this command will be 1 byte, that will be the bootloader
+
+version number.
+
+Now, let's see another example.
+
+This is the bootloader get help command.
+
+The goal of this command to extract all the supported command codes from the bootloader.
+
+I suggest you to refer to this document in order to understand, what each command does.
+
+All right.
+
+And in this particular command the total bytes of the packet will be again 6, and the length to follow
+
+field will contain the value 5, and the command code will be 0x52 and bootloader reply
+
+will be all the supported
+
+command codes.
+
+We will see more on this when we implement this code in our implementation lectures.
+
+And here is another
+
+command get the chip identification number of the microcontroller. Again the length to follow field will
+
+contain the value 5, and total bytes of the packet will be 6 bytes, and bootloader reply will be 2
+
+bytes for this particular command.
+
+So, that is actually 2 bytes of microcontroller chip identification number.
+
+Now, let's move forward and here is another command.
+
+So, this command format is little different.
+
+This command is bootloader go to address.
+
+All right.
+
+Now, let's explore that command here, bootloader go to address. This command is used to jump bootloader
+
+to specified address. So, host uses this command in order to instruct the bootloader to jump to specified
+
+memory address, So, that memory address will be sent by the host in this field memory address.
+
+So, the format is the first 2 bytes will be reserved for length to follow and command code.
+
+And the third field will be memory address of 4 bytes mentioned by the host,
+
+and again the last 4 bytes will be the CRC.
+
+So, once bootloader receives this command it will jump to the memory specified by the host.
+
+So, here the third field will be base memory address that is 4 byte base address to jump. And
+
+the total byte now will be 4+ 4+2 that is 10, and the length to follow will contain the value
+
+9. And the bootloader reply will be status whether it is success or failure.
+
+The failure happens, if bootloader detects that the given address is completely invalid. Because, the bootloader
+
+jumps to only those memory locations for which it is allowed.
+
+So, if host mentions any invalid address then the bootloader will simply reply saying, it's an invalid
+
+address in the status field.
+
+So, we will see more on this as we make a progress,
+
+don't worry about that.
+
+And now this is the command packet format to execute the bootloader flash erase command. And the host
+
+uses this command
+
+in order to instruct the bootloader to erase a particular sector or range of a specified sectors. And the
+
+command format is very simple.
+
+The first 2 fields are as before and the third field will be sector number.
+
+All right.
+
+So, in my microcontroller there are 7 sectors, sorry there are 8 sectors from 0 to 7.
+
+So, host will mention which sector needs to be erased in this field.
+
+So, the only allowed values are this much 0 to 7.
+
+And how many sectors host wants to erase? Starting from the sector number over here. So, that you can that
+
+host can mention here.
+
+So, range is from 0 to 7.
+
+So, for example here, if I mention something like 3 and 2 then host wants to erase sector 3 and
+
+4.
+
+So, because number of sectors to erase is 2. Isn't it?
+
+So, that's why,
+
+starting from 3 bootloader erases 2 sectors, 3 and 4.
+
+All right.
+
+And the status will be what exactly is the status of that flash erase command. Whether it is a success
+
+or failure.
+
+All right.So, that status code will be returned to the host. And the next command is Memory write. Now,
+
+this is really important command because, we use this command in order to program the binary into the
+
+microcontroller flash memory.
+
+And there are 3 extra fields here.
+
+One is the base memory address.
+
+That means, the host tells the bootloader
+
+start writing from this base memory address and the payload length.
+
+That means, how many bytes the host wants to write.
+
+So, that is mentioned in the payload length,
+
+and then this field is the payload that is streams
+
+of bytes, which the host wants to write on to the flash or RAM memory of the microcontroller.
+
+So, you can use this command in order to write to any allowed memory address.
+
+All right.
+
+So, it need not be only flash.
+
+It can be RAM, SRAM1 or SRAM2 or any other allowed memories.
+
+OK.So, here the payload length field is 1 byte. Isn't it?
+
+So, that means the maximum value of this field will be 255. Isn't it?
+
+So, that's why the maximum bytes you can send in a payload field is 255 bytes. Isn't it?
+
+All right.
+
+So, here is a description. Base memory address that is it's a 4 byte base address, from which bootloader should
+
+start writing into the memory and payload length is number of bytes to write and payload of course it's
+
+a stream of bytes to write.Fine.
+
+So, that's the format of the BL_MEM_WRITE
+
+command. Now, let's move forward.
+
+All right. So, the next command is bootloader Mem
+
+Read.
+
+That means, a memory read command and this command is actually used to read the contents of the memory
+
+back into the host.
+
+OK.
+
+So, you can instruct the bootloader to read some bytes from the memory address given in this field, and
+
+you have to mention how many bytes you want to read in this field. So, that the bootloader can read those
+
+amounts of memory contents and it can send it back to the host and then host can write that into some
+
+text file or something to recreate the bin file or something like that.OK.
+
+So, this is not a much useful command, but you know you can implement this command as a part of your
+
+bootloader development and this command I have not implemented in this project.
+
+So, I have left this as an exercise for the students and if you are interested you can implement this.
+
+So, here the base memory address means 4 byte base address from which data has to be read. And length is
+
+number of bytes to read and the status will be
+
+I mean the reply from the bootloader will be status plus length number of bytes.
+
+So, if status is 0 then it's a success, if status field is 1 than is a failure.
+
+So, if status field is 1 then this is ignored and if the status field is 0 that means it's a
+
+success and this will contain
+
+length number of bytes.
+
+OK. Great.
+
+Now, let's move to the next command that is bootloader and enable read write protect.
+
+So, this is very important command.
+
+This command is a very simple command.
+
+So,which is used to put read and write protection on different sectors of the flash memory.
+
+So, here in this field it's a one byte field.Here,
+
+you have to mention the sector details or you have to encode the sector details. So, sector numbers are
+
+encoded in 8 bits.
+
+For example, 0th bit is sector 0.
+
+So, I like that.
+
+So, 7th bit is sector 7.
+
+So, if that bit is 1, then it means protection is needed.
+
+And if any bit is 0, then no protection.
+
+So,protection is not required. And protection mode indicates whether you want to put a write protection
+
+or read write protection. On those sectors which are encoded in the sector details field. All right.
+
+So, status will be the reply from the bootloader and if the status is 0 it means success,
+
+and if the status is non-zero then it's a failure.
+
+Great.
+
+So, use this command if you want to put read and write protections on to the different sectors.
+
+Now, let's move to the next
+
+command bootloader disable read write protect.
+
+So, this command is very very simple
+
+it doesn't have any argument.
+
+OK. So, this actually you know disables active protection on all the sectors.
+
+So, it will resumes the status of the sectors to it's default state.
+
+So, it actually disables all the active protections.
+
+And again the status will be the reply from the bootloader only one byte.
+
+So, non-zero means it's a failure,
+
+and if the status is 0, that means it's a successful execution of the command.
+
+All right.So, now the next command is bootloader read sector status.
+
+So, this is a very simple command as you can say it doesn't have any arguments.
+
+And this command is actually used to read back the protection status of different sectors of the
+
+user flash memory.
+
+So, don't worry if you're not understanding anything right now. As we make progress we're going to explore
+
+various things about the protection status of different sectors of the flash memory how to change them,
+
+how to configure them, and how to read them.
+
+So, all these things we're going to explore by referring to the reference manual of the microcontroller.
+
+And that time it will be clear for you to implement this command and this command when executed
+
+bootloader reply will be 2 bytes.
+
+OK.
+
+Which consists of the protection status of all the different sectors of the user flash memory.
+
+Great.
+
+So, now this command is actually not implemented.
+
+It is left as an exercise for the students to complete and don't worry.
+
+So, you will have enough knowledge and enough hints in order to implement this command,
+
+when we explored the different protection status of the flash memory.
+
+Great.
+
+So, with that note I will like to end this video, and from the next lecture let's get started with the
+
+implementation.

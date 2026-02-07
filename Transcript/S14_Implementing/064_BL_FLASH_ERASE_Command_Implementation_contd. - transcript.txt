@@ -1,0 +1,301 @@
+All right.
+
+So, this is the command format of the bootloader flash erase command and host uses this command in order
+
+to instruct the bootloader to erase a specified sector number.
+
+And here we can see there are 2 extra field in this
+
+command packet and the sector number has to be between 0 and 7,
+
+and number of sectors must be between 0 to 7.All
+
+right.
+
+And now, we can introduce one special case for this sector number.
+
+Now, the special case is if the sector number is 0xFF, then it's an indication for the bootloader
+
+to perform mass erase.
+
+All right. So, that's a special case
+
+I want to introduce into this command format.
+
+OK.
+
+If the sector number is 0xFF, then it will be a special case where
+
+bootloader should do mass erase.
+
+That means, it should erase all the sectors from 0 to 7.
+
+Great.
+
+Now, let's do this.
+
+And I would like to take you to the flash driver first, hal_flash.c
+
+and here you will find the API in order to erase the flash memory.
+
+I'm sorry, not in flash.c but flash_ex.c here.
+
+Here is a function for erase.
+
+So, this API takes 2 arguments here.
+
+So, one is FLASH_EraseInit structure and you have to fill this structure and you have to
+
+then pass it to the flash
+
+erase API.
+
+We have to send the pointer to that structure. All right.
+
+And another argument is address to the uint32 data type.
+
+So, now you can read here.A pointer the first argument is a pointer to this structure type that contains
+
+the configuration information for the erasing.
+
+All right.
+
+And the second argument is pointer to the variable that contains the configuration information on
+
+faulty sector in case of error.
+
+All right. So, this address will be used by the driver API in order to store some information.
+
+If it stores this number, then it means that all the sectors have been corrupting erased.
+
+So, it is for you to examine how many sectors are really erased or is there any error etc..
+
+So, you have to take a look into this variable in order to decode that information.
+
+All right. So, let's not worry about this argument.
+
+Now, let's take a look into this structure.
+
+So, let's right click and let's go to definition and here it is.
+
+So, this structure you have to fill and you have to send it to the driver. So, first you have to mention what
+
+type of erase, whether it's a mass erase or sector erase.
+
+So, you can check this reference here in order to see what are the possible options. For example,
+
+So, let's go here, let's search for this macro here it is.
+
+So, either you can make that variable as FLASH_TYPEERASE_SECTORS,
+
+this is for sector erase or
+
+you can make that type of erase member element as mass erase.Now, let's go back.
+
+So, either one of those macros you have to use in this field.
+
+All right.
+
+And next is Bank, flash bank.
+
+So, select banks to erase when mass erase is enabled.
+
+So, this is not actually applicable to our microcontroller so you can leave this a member element.
+
+All right.
+
+Now, next is sector number.
+
+All right. So, initial flash sector to erase you have to mention this.
+
+So, the number of sectors as well as you have to mention the voltage range.So, voltage range means, so whenever
+
+you are dealing with flash there are some voltage range has to be maintained. So, that you had to mention
+
+in this field.
+
+So, you have to select one option which is given in this macro.
+
+All right.
+
+This parameter must be a value of this reference.
+
+All right. So, now let's explore this reference here it is.
+
+So, you have to mention one among these macros. So, if your micro-controller operating in this
+
+voltage, you have to mention this macro.
+
+And if you are micro-controller is operating in this voltage which is true for our case,
+
+OK
+
+Our microcontroller will be operating in this voltage range, that is 2.7 to 3.6.
+
+All right.
+
+So, in that case you have to use this macro for this member element.
+
+And after that, this erase function will take care of erasing
+
+your flash.
+
+So, this code is written in the driver file and it is written by keeping these procedures in mind.
+
+Great.
+
+So, now our job is to just use this in order to perform mass erase or sector erase.
+
+Now, let's see how it is used
+
+in our case, and now let me go back to our bootloader project.
+
+So, here is a function which takes care or handles the bootloader flash erase
+
+command.
+
+So, this is a handle function.
+
+Now, let's explore this.
+
+So, after the CRC verification we send the Ack and after that I call this function execute
+
+flash erase.
+
+All right.
+
+And I will pass the third byte as well as the 4th byte of the command packet.
+
+So, that means I pass sector number as well as number of sectors.
+
+So, that is the third and fourth byte, isn't it?
+
+That actually takes us to execute flash erase.
+
+Now, let's see what is implemented here and this execute flash erase returns.
+
+What is the error status, whether it is success or failure or it's a invalid sector etc..
+
+OK.
+
+And I just send that status back to the host here.
+
+So, that's a bootloader reply here.
+
+All right.
+
+And before starting the erase I just make the LED high,
+
+and after the erase I just make the LED low
+
+just to indicate that the flash erase is going on.
+
+All right.
+
+Great.
+
+Now, let's explore what exactly this execute flash
+
+erase does?
+
+Now, let's go to the implementation and here is a implementation.
+
+So, we have totally 8 sectors in this micro-controller 0 to 7.
+
+Now, number of sector has to be in the range of 0 to 7. Right?
+
+So,now if the sector number is FF, then that means that it's a request for mass erase.
+
+Now, code needs to be modified if your MCU supports more flash sectors.
+
+OK.
+
+So, you can always edit this code.
+
+Now, here I extract lotsof details.
+
+Here, is a sector number is passed by our handle function, and this is a number of sector and it undergoes
+
+various checks here.
+
+If sector number is FF, then it's a type of erase is mass erase. All
+
+right.
+
+And if it is not equal to FF, then it's a sector erase.
+
+So. that's why I make type of type erase as sector erase.All
+
+right. Now, after that sector will be programmed with this sector number.
+
+So, and the number of sectors will be programmed with number of sector field,which we received here.
+
+And at the end what we do is we execute flash erase. And remember that the voltage range
+
+as I told you it must be FLASH_VOLTAGE_RANGE_3. Now, before calling this API
+
+you have to unlock the flash. So, that is required for this microcontroller because in order to access
+
+any flash registers you have to unlock the flash first.
+
+Again this is an API from the flash driver to unlock the flash.
+
+So, unlocking about unlocking you can read more here.
+
+It is right here.
+
+All right.
+
+So, unlocking the flash control register.
+
+So, that's what done in this function unlocking.
+
+Actually you have to set some passwords are keys.
+
+All right.
+
+So, you have to write this key into the flash key register this one.
+
+And again you have to put another key into the flash key register OK, that actually unlocks the access to
+
+the flash registers.
+
+All right.
+
+And after the flash erase you again lock back.
+
+That's what done here.
+
+So, all these informations are actually stored in flashErase_handle, that's a variable of this structure
+
+type.
+
+OK.
+
+And the address of this will be passed in the erase API. And the status which is returned by this
+
+API will be captured in the status variable and that will be sent back to the handle application.
+
+All right. So, the possible status could be I will show you the possible status.
+
+Let's go to Keil.
+
+So, this is a possible status so let's explore this.
+
+So, these are the possible status.
+
+HAL_OK if everything is OK, if there is any error it will return that the API will return a HAL_ERROR.
+
+If the flash is busy then it will return busy.
+
+That means if any other operation is going on then it may return busy and if there is any timeout that it
+
+may return timeout.
+
+All right. So, this will be passed back to the host.
+
+All right. So, this is our flash erase handle function.
+
+And now let's test this.
+
+Now, let's compile this code.

@@ -1,0 +1,247 @@
+Let's try to print some characters over the UART, just to see everything works or not.
+
+So, I have just connected my Nucleo board and I will just write a code to generate characters over the
+
+USART2 interface.
+
+So, that is actually connected to the virtual COM port of the Nucleo board.
+
+So, now what I do is, I will just write some code here and what I do is I just use the API.
+
+See we are working with the UART peripheral, right? And to know the APIs that is the driver exposed
+
+APIs, for the UART peripheral and you have to take a look into the you are driver provided by
+
+ST OK. For that,
+
+what I suggest do is, go to this functions tab here and here expand STM32F4xx
+
+hal_uart.c OK. For example here it is
+
+And once you do that OK,
+
+So, you will see all the functions which are supported by the UART driver or all the API exposed by the
+
+UART driver.
+
+So, in this select appropriate function which matches with your purpose. For example, here I want to send
+
+a string of data to my PC over the UART peripheral. Right?
+
+So, for that I will select HAL_UART_Transmit and you will also find another similar function
+
+HAL_UART_Transmit_IT. IT means in a interrupt mode.
+
+So, I will just select this one HAL_UART_Transmit.
+
+And if you just double click that OK, it will take you to that function which is implemented in the driver
+
+file.
+
+So, for example this is a hal.uart.c.
+
+OK. So, don't change anything in this file.
+
+OK. So, this is written by the vendor.
+
+So, your not supposed to change this.
+
+And here you can see that, you just have to pass a handle a peripheral handle and data,
+
+and how many bytes you want to send, and the timeout information. So, great.
+
+So, now lets use this function in our main.c it's is very simple. Right?
+
+All right.So, now let's use this function to send some characters.
+
+OK. So, I'll just copy this function name into my code.
+
+And here in the main.c, let's call in the while ,
+
+and for this as you know you have to send the address of the handle and let's select this handle
+
+UART2, handle
+
+UART2.
+
+We have to send the address of that and the data also some strings,
+
+we have to send.
+
+OK. So,let's say I
+
+Now, let's declare some strings.
+
+OK.
+
+Bootloader OK.So,I will
+
+just give \r and \n.
+
+Great.
+
+So, now let's use this pointer here OK, so uint8_t *.
+
+So, we have typecast that it unsigned character pointer,
+
+and then the size of that array and here you just give HAL_MAX_DELAY, the delay field. Grate.
+
+So, this will print this string continuously onto our serial terminal.
+
+So, if you want to give some delay so you can give that, and we know that already the systick actually generates
+
+interrupts for every one milliseconds. Right?
+
+So, you can use that to create delay.
+
+For example, let's say so let's declare one variable. So, let's say current_tick is equal to there is a
+
+function called HAL_GetTick.
+
+OK. So, this is actually implemented in STM32F4xx_hal.c and it returns a tick value,
+
+cuuren_tick value.
+
+This variable is actually a global variable, which is incremented whenever the systick timer generates
+
+interrupt.
+
+OK. That means, this variable is incremented for every one millisecond.
+
+So, if you want to know where exactly it is incremented.
+
+OK. You have to go and check the interrupt handler of the systick
+
+timer OK, which is written in STM32F4xx_it.c,
+
+all the interrupt handler will be written here.
+
+And if you browse through this file you will find one function systick handler and this increments the
+
+tick OK.So, if you just go inside that you will see ++ here.
+
+Great. So, now let's see what this does.
+
+So, this actually gives a call back to your application if you want.
+
+So, that's not required for us.
+
+All right.
+
+So, this returns the current_tick value.
+
+So, now I can easily implement a small delay.
+
+So, let's say while this current time is less than or equal to.
+
+So,let's say current_tick + 500.
+
+So, this while loop will hang until the current_tick value exceeds 500 more ticks OK, than the current_tick.
+
+Great.
+
+So, this while loop will hang until whatever the value returned by this GetTick increases by 500 over
+
+this value. Great, Now let's compile this. Let's see whether it's compiles or not.Grate, it compiles no problem.
+
+And let's download,
+
+OK. So, let's reset the board and let's open a TeraTerm or Putty whatever.
+
+So, here is a virtual COM port detected.
+
+When I connected my board let me select that and OK. So, it is sending some garbage value.
+
+Let's go to set up and click on serial port and here select a Baud rate that is 115200, click
+
+OK.
+
+and here it is. We are indeed getting some prints over the virtual COM port.
+
+So, which happens to be our USART2. Isn't it?
+
+All right. So, now let's do the same
+
+UART testing using STM32 system workbench.
+
+OK.
+
+And we will also understand how we can flash the code onto the target using this software.
+
+Great.
+
+So, I have used the same code in the main.c what we just wrote in Keil,
+
+In the while loop I have just returned these 3 lines of code and it is just printing
+
+this some data string,
+
+which happens to be this string.
+
+Right?
+
+So, the same code.
+
+OK.
+
+Now, first let's build the project.
+
+So, I just click on this hammer icon here and it has build the code,
+
+and now hope your board is connected to the PC and right click on the project and select Debug
+
+As,here we are debugging.
+
+OK. So, Debug As select Ac6 STM32 C/C++ Application,
+
+Just click on that and now it will flash and it will try to go to the debug mode.
+
+So, that's why it is asking whether you want to change the perspective.
+
+Take a look into these icons here.
+
+So, this is nothing but the C and C++ code editing perspective,
+
+this is a debug perspective. So, it is asking your permission to go into this debug perspective.
+
+So, click Yes and here you can see it went into the debug perspective. And now here the code is not running,
+
+OK.So, now the courser is pointing to the first instruction of the main function.
+
+Now, let's hit this resume button in order to execute the code.
+
+So, just click a resume button and the code must be running.
+
+So, let's check in the TeraTerm whether we are getting any output or not.
+
+All right. So, yes in the TeraTerm we are indeed getting the strings. Right? Now,
+
+If you want to terminate, you can just click over here that will terminate the debug process.
+
+And here you can see the code is still running OK. So, and you can come back to the C and C++ perspective
+
+by clicking over hit and again here again
+
+edit the code and you can again test it. Now,
+
+sometime you just want to flash the code you don't want to debug the code.
+
+So, in that case what you do is, you can just right click on your project and click Run As instead of
+
+Debug As.
+
+OK. So, Run As Ac6 application and it will just you know flash that code on to your hardware OK.So, it won't it
+
+won't go into the debug mode.
+
+All right. It is just flashing. Grate. So, that's how you can use this software in order to download and debug
+
+code onto the target hardware.
+
+I hope you will do that and all the remaining code editions
+
+What I do,
+
+Using Keil you can also do it on this software and you can test it.
+
+So, with that note let me end this video and I will see you in the next lecture.

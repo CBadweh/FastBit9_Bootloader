@@ -1,0 +1,75 @@
+Hey, welcome back to the lecture.
+
+So, once you have your ST board either discovery or Nucleo or any other board from ST, which is based
+
+on ST-Link in circuit debugger and programmer, then in order to talk to the board successfully you
+
+have to install the ST-Link drivers. The ST-Link drivers that means the driver for this interface.
+
+This is the ST-Link in circuit debugger and programmer, isn't it?
+
+Now, the driver for Windows 32/ 64 bit these versions.
+
+It is available in STs Web site so you can directly go there.
+
+So, just go to this link and so this is a USB driver for those boards which has this ST-Link
+
+circuitry,
+
+and at the end you will find the drivers so just download this.
+
+So, once you download this go to that a folder.
+
+So, here I have downloaded and here you will see 2 applications.
+
+So, this is for 32 bit,
+
+and this is for 64 bit.
+
+So, what you do is connect your board,
+
+It could be either discovery or Nucleo. And just run this software,
+
+now let's click next, and it will install here the WinUSB driver that is required in order to talk to this
+
+ST-Link and other drivers it will install, here it is.
+
+So, once you do that click Finish and just see your device manager.
+
+Now currently my Nucleo board is connected.
+
+And here, you will see the COM port and after that in USB devices you will find ST microelectronics
+
+ST-Link dongle.
+
+So, you will see this option.
+
+So, in order to communicate with the board over UART, we use this interface the same interface and your
+
+host application or host IDE uses this interface.
+
+This is the interface used for debugging.
+
+Great.
+
+Remember that, the ST-Link driver installation is very very important.
+
+Once you have your board we have to do this. And for Ubuntu you just have to run these commands on
+
+your command prompt to install these packages, and ST doesn't give any drivers specifically for Ubuntu
+
+or Mac.
+
+So, Ubuntu guys just install these,
+
+and for Mac no driver installation is required.
+
+Great.
+
+Now, in the next lecture, we will see how we can do ST-Link firmware upgrade.So, ones you install the ST-Link
+
+drivers,
+
+you have to upgrade the firmware which is running in the ST-Link circuitry. That will see you in the next
+
+lecture.

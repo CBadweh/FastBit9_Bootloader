@@ -1,0 +1,99 @@
+Hey, thanks for enrolling to this course.
+
+And in this lecture, let me give you an quick overview about this course.
+
+So, this course has already more than 20 sections for you and each section consist of couple of
+
+lectures for you to complete.
+
+And let's see, what are the things the course covers in section 1 is a course overview.
+
+Also you will get to know the codes a source code repository from where you can download the source code.
+
+OK.
+
+And I will also you know push changes to this repository. In the section 2,
+
+I will explain you what exactly is a bootloader, and what is the main purpose of the bootloader and why exactly
+
+it is needed.
+
+And in the section 3, It's a very important section where
+
+I will explain you about them MCU memory architecture, the reset sequences of the ARM Cortex M micro-controller,
+
+and also the boot configurations of the STM32 micro-controller,
+
+where I will explain you boot sequences as well as the memory Aliasing feature of the micro-controller.
+
+The section 4, 5,6,7 and you will come to know what exactly is a hardware used in this course,
+
+and I will also guide you through step by step procedure how to install the IDEs on your machine.
+
+OK.
+
+So, this section is beneficial for the beginners are for the new student.
+
+So, if you are already taken our courses and if you have already installed KEIL, or Open STM32,
+
+or eclipse then you need not to complete these sections.
+
+OK. You can skip it. But, if you have not installed any IDEs on your machine, then it's better to complete
+
+section 4, 5, 6, 7. And in the section 8,
+
+I will explain you how you can activate the STM32s native Boot loader and will just play with that.
+
+And in the section 9, I will talk about custom bootloader communication with the host. The host our
+
+in our case, the Host is our PC and will see how our custom bootloader should communicate with the
+
+host. And in the section 10, will get started with the project creation for the bootloader and we will
+
+add lots of peripherals like UART, CRC and other peripherals to the project. And then in the section 11,
+
+I will talk about testing the
+
+Command UART as well as
+
+Debug UART for our job. And in the section 12, will write a small code
+
+where the bootloader hands of control to the user application, and changing the vector table offset register,
+
+and also I will explain you the flash code placement etc..
+
+OK.
+
+And in the section 13,
+
+I will tell you how bootloader reads commands from the host.
+
+So, it's actually based on custom protocol, so I will tell you how bootloader and Host you know hand-shakes
+
+each other and from section 14 on words,
+
+we will start implementing the commands one by one.
+
+So, there are lots of commands which the host sends to the bootloader in order to receive the reply.
+
+So, like bootloader Get version command, Get Help command, Get Chip identification command, Reading
+
+the RDP Level, Going to some address and executing the code, Flash Erase command, Memory write
+
+command, and lots of other commands related to flash
+
+read/write configuration.
+
+So, all these commands are documented well and we will explain one by one from Section 14 onwords. So,
+
+we will implement the handle functions for each command in the bootloader project. And then we will send
+
+command from the host in order to test that command behavior.
+
+OK. And remember tha t this is not the end of the course.
+
+Every week I will be pushing new contents to our courses and the course will be constantly updated.
+
+All right. So,that's a quick over view about the course
+
+and I will see you in the next lecture.
