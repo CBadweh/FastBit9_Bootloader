@@ -74,8 +74,26 @@ void Error_Handler(void);
 #define SWO_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
+// Bootloader version
+#define BL_VERSION  0x10
 
+// Debug message enable/disable
+#define BL_DEBUG_MSG_EN
+
+// Buffer sizes
+#define BL_RX_LEN  200
 /* USER CODE END Private defines */
+
+// STM32F401RE Memory Map
+#define SRAM1_SIZE            (96 * 1024)     // 96KB (F401RE has 96KB, NOT 128KB)
+#define SRAM1_END             (SRAM1_BASE + SRAM1_SIZE)
+// Note: F401RE does NOT have SRAM2
+
+#define FLASH_SIZE            (512 * 1024)    // 512KB
+#define BKPSRAM_SIZE          (4 * 1024)      // 4KB Backup SRAM
+
+// Flash sector base addresses
+#define FLASH_SECTOR2_BASE_ADDRESS  0x08008000U  // User app starts here
 
 #ifdef __cplusplus
 }

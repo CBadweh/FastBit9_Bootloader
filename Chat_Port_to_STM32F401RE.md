@@ -1716,3 +1716,1491 @@ In CubeIDE:
 3. First implement the full bootloader code in this project?
 
 What's your preference?
+
+
+        in general for project like this, C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_Bootloader
+
+        What file or folder should I add to gitignore? 
+        .setting/
+        Debug/
+        Drivers/
+        .cproject
+        etc
+
+        why and why not?
+
+        answer in chat
+
+## Git Best Practices for STM32CubeIDE Projects
+
+### ✅ SHOULD Add to .gitignore
+
+| File/Folder | Reason |
+| --- | --- |
+| **Debug/** | Build artifacts — regenerated on every build, large binaries |
+| **Release/** | Same as Debug — build outputs, not source |
+| **.settings/** | IDE-specific user preferences, varies per developer |
+| **.metadata/** | Eclipse workspace metadata, not project-specific |
+| **.launch** files | Debug configurations, often contains absolute paths |
+| ***.elf** | Binary executable, regenerated from source |
+| ***.bin**, ***.hex** | Binary outputs, regenerated (exception: final release binaries) |
+| ***.map** | Linker map file, large and regenerated |
+| ***.o**, ***.d** | Object files and dependency files, intermediate build artifacts |
+| ***.su** | Stack usage files, build artifacts |
+
+---
+
+### ❌ SHOULD NOT Ignore (commit these)
+
+| File/Folder | Reason |
+| --- | --- |
+| **Core/** | Your source code — the heart of the project |
+| **Drivers/** | **IMPORTANT:** HAL/CMSIS libraries — needed to build on other machines |
+| **.cproject** | CDT project file — defines compiler settings, build config |
+| **.project** | Eclipse project file — defines project structure |
+| **STM32F401RETX_FLASH.ld** | Linker script — critical for memory layout (bootloader vs user app) |
+| **.ioc** file | CubeMX configuration — regenerates init code |
+| **.mxproject** | CubeMX metadata — needed for .ioc to work |
+
+---
+
+### 🤔 Conditional (depends on workflow)
+
+| File/Folder | Keep if... | Ignore if... |
+| --- | --- | --- |
+| **Drivers/** | Team doesn't have STM32Cube installed | Everyone has same Cube version — saves repo size |
+| **.settings/language.settings.xml** | Contains build configuration | You want each dev to regenerate |
+| **startup_stm32f401xe.s** | Custom modifications made | Standard CubeMX-generated |
+
+---
+
+## Recommended .gitignore for Your Project
+
+`# Build outputs
+Debug/
+Release/
+
+# Binary files
+*.elf
+*.bin
+*.hex
+*.map
+*.su
+
+# Object files
+*.o
+*.d
+
+# IDE settings (user-specific)
+.settings/
+
+# Launch configurations (contain absolute paths)
+*.launch
+
+# Eclipse metadata
+.metadata/
+
+# Optional: Uncomment if team has STM32Cube installed
+# Drivers/`
+
+---
+
+## Why This Matters
+
+### Keep .cproject and .project:
+
+- Contains **compiler flags**, **include paths**, **optimization settings**
+- Without these, other developers can't build the project
+- Linker script path is defined here
+
+### Keep Drivers/ (usually):
+
+- ~50MB of HAL code
+- Without it, project won't compile on fresh clone
+- Alternative: Document which STM32Cube version to install
+
+### Keep .ioc:
+
+- Single source of truth for peripheral configuration
+- Regenerates all init code in `main.c`, `stm32f4xx_hal_msp.c`
+- Critical for understanding pin assignments
+
+### Ignore Debug/:
+
+- Contains 700KB+ binaries that change every build
+- Bloats git history
+- Easily regenerated from source
+
+---
+
+## Special Case: Linker Scripts
+
+**STM32F401RETX_FLASH.ld** — **MUST COMMIT**
+
+Why?
+
+- Bootloader: `FLASH ORIGIN = 0x08000000`
+- User App: `FLASH ORIGIN = 0x08008000`
+- This difference is **essential** to the project and can't be auto-generated
+
+---
+
+**Bottom line for your project:**
+
+`COMMIT: Core/, .cproject, .project, .ioc, *.ld, Drivers/
+IGNORE: Debug/, Release/, .settings/, *.elf, *.bin, *.map`
+
+
+
+
+# Step 3
+Move to Phase 3 (user app project)
+
+# Phase 3: User Application Project Creation
+
+Let me guide you through creating the user application project.
+
+---
+
+## ✅ Step 3.1: Create User App Project
+
+1. **File → New → STM32 Project**
+2. **Board Selector tab:**
+    - Search: `NUCLEO-F401RE`
+    - Select it → **Next**
+3. **Project Setup:**
+    - Project Name: `FastBit_Badweh_UserApp`
+    - Location: Keep default (or same parent folder as bootloader)
+    - Targeted Language: **C**
+    - Targeted Binary Type: **Executable**
+    - Targeted Project Type: **STM32Cube**
+    - Click **Finish**
+4. **Initialize all peripherals with their default Mode?**
+    - Select **Yes** (this will auto-configure the button and LED)
+
+**Wait for project generation to complete.**
+
+---
+
+## ✅ Step 3.2: Configure Peripherals (User App)
+
+The `.ioc` file should open automatically. Configure:
+
+### GPIO Configuration:
+
+**PC13 (Button) - EXTI Interrupt:**
+
+- Should already be configured as `B1 [Blue PushButton]`
+- Click on **PC13** in the chip view
+- Verify: `GPIO_EXTI13` mode
+- Go to: **System Core → GPIO → PC13**
+    - GPIO mode: **External Interrupt Mode with Falling edge trigger detection**
+    - GPIO Pull-up/Pull-down: **No pull-up and no pull-down**
+    - User Label: `B1 [Blue PushButton]`
+
+**Enable EXTI Interrupt:**
+
+- Go to: **System Core → NVIC**
+- Check: **EXTI line[15:10] interrupts** → ✅ Enabled
+
+**PA5 (LED):**
+
+- Should already be configured as `LD2 [Green Led]`
+- Verify: GPIO_Output mode
+
+### USART2 (Optional - for demo message):
+
+- **Connectivity → USART2**
+- Mode: **Asynchronous**
+- Pins: PA2 (TX), PA3 (RX) - auto-assigned
+- Baud Rate: **115200**, 8N1, no flow control
+
+### Clock Configuration:
+
+- **Clock Configuration tab**
+- Set HCLK to **84** MHz (press Enter, let CubeMX auto-configure PLL)
+
+### Generate Code:
+
+- Save (Ctrl+S)
+- **Generate Code** (should prompt automatically, or click the gear icon)
+- Click **Yes** when asked to generate
+
+---
+
+## ✅ Step 3.3: Relocate User App to Sector 2
+
+The user app must start at `0x08008000` (after the bootloader).
+
+### Edit Linker Script:
+
+1. In Project Explorer, find: `STM32F401RETX_FLASH.ld`
+2. Open it
+3. Find the `MEMORY` section (around line 30-40):
+    
+    `MEMORY
+    {
+      RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 96K
+      FLASH (rx)     : ORIGIN = 0x8000000, LENGTH = 512K
+    }`
+    
+4. Change FLASH line to:
+    
+    `FLASH (rx)     : ORIGIN = 0x08008000, LENGTH = 480K`
+    
+    (480K = 512K - 32K bootloader)
+    
+5. **Save**
+6. **Project → Clean → Clean all projects**
+7. **Build** (Ctrl+B)
+
+**Verify:** Build completes with 0 errors
+
+---
+
+## ✅ Step 3.4: Set VTOR Offset
+
+The user app needs to relocate the interrupt vector table.
+
+1. Open: `Core/Src/system_stm32f4xx.c`
+2. Find line ~60-80:
+    
+    `#define VECT_TAB_OFFSET  0x00000000U /*!< Vector Table base offset field.
+                                              This value must be a multiple of 0x200. */`
+    
+3. Change to:
+    
+    `#define VECT_TAB_OFFSET  0x00008000U /*!< Vector Table base offset field.
+                                              This value must be a multiple of 0x200. */`
+    
+4. **Save**
+5. **Rebuild** (Ctrl+B)
+
+---
+
+## ✅ Step 3.5: Add User App Test Code
+
+### Add Demo Code:
+
+Open `Core/Src/main.c`:
+
+**Before `while(1)` loop (in USER CODE BEGIN 2):**
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+/* USER CODE END 2 */`
+
+**Inside `while(1)` (in USER CODE BEGIN WHILE):**
+
+`/* USER CODE BEGIN WHILE */
+while (1)
+{
+    // Application runs, LED can be toggled by button interrupt
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+}
+/* USER CODE END 3 */`
+
+### Add EXTI Callback for Button:
+
+Open `Core/Src/stm32f4xx_it.c`, scroll to the bottom and add this **before** the last `#endif`:
+
+`/* USER CODE BEGIN 1 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == GPIO_PIN_13)  // Button B1
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);  // Toggle LED
+    }
+}
+/* USER CODE END 1 */`
+
+**Save and Build** (Ctrl+B)
+
+---
+
+## ✅ Step 3.6: Enable Binary Output
+
+Same as bootloader project:
+
+1. **Project → Properties → C/C++ Build → Settings**
+2. **MCU Post build outputs** → Check **"Convert to binary file (-O binary)"**
+3. **Apply and Close**
+4. **Clean and Rebuild**
+5. **Verify:** `Debug/FastBit_Badweh_UserApp.bin` exists
+
+---
+
+## ✅ Step 3.7: Flash and Test User App
+
+### First Test - Flash Manually:
+
+1. **Set active project:** Right-click `FastBit_Badweh_UserApp` → Set as Active Project
+2. **Run → Debug** (this will flash to `0x08008000`)
+3. **Resume (F8)** to let it run
+4. **Open PuTTY:** COM4, 115200 baud
+5. **Expected:** See "Hello From User Application" once
+6. **Press blue button** → LED should toggle
+
+**If this works, user app is correct!** ✅
+
+---
+
+## Summary of What We Built
+
+| Project | Flash Location | Size | Purpose |
+| --- | --- | --- | --- |
+| **FastBit_Badweh_Bootloader** | `0x08000000` (Sectors 0-1) | 32KB | Custom bootloader |
+| **FastBit_Badweh_UserApp** | `0x08008000` (Sectors 2+) | 480KB | User application with EXTI |
+
+---
+
+**Ready to test the user app?** Let me know if you hit any issues during Phase 3!
+
+Okay, I did as you mentiond.
+
+I saw "Hello From User Application" once, but nothing toggle when I press the LED. 
+
+Please thoughly check 
+C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\main.c
+C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\stm32f4xx_it.c
+C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\system_stm32f4xx.c
+
+**Read** C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\main.c
+
+**Read** C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\stm32f4xx_it.c
+
+**Read** C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\system_stm32f4xx.c (lines 51-100)
+
+**Read** C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\system_stm32f4xx.c (lines 97-111)
+
+**Read** C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Inc\main.h (lines 91-120)
+
+**Read** C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Inc\main.h
+
+# Found the Issues!
+
+After thorough review, I found **2 problems**:
+
+---
+
+## ✅ Good News:
+
+1. **VTOR offset is correct:** Line 108 in `system_stm32f4xx.c` shows `0x00008000U` ✅
+2. **EXTI interrupt handler exists:** Lines 216-222 in `stm32f4xx_it.c` ✅
+3. **NVIC is enabled:** Lines 222-223 in `main.c` ✅
+4. **GPIO configuration is correct:** Lines 208-219 in `main.c` ✅
+
+---
+
+## ❌ Problems Found:
+
+### Problem 1: Button Debouncing Issue
+
+The blue button on Nucleo is **mechanically noisy**. When you press it, it may:
+
+- Generate multiple interrupts (bouncing)
+- LED toggles multiple times so fast you see it as "not working"
+
+### Problem 2: Missing Include
+
+The callback function uses `GPIOA` directly, but this might not be visible without proper includes.
+
+---
+
+## Solutions to Try:
+
+### Test 1: Add Debounce Delay
+
+Modify the callback in `stm32f4xx_it.c` (lines 216-222):
+
+`/* USER CODE BEGIN 1 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == GPIO_PIN_13)  // Button B1
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);  // Toggle LED
+        HAL_Delay(200);  // Simple debounce - wait 200ms
+    }
+}
+/* USER CODE END 1 */`
+
+**Rebuild and test** - does LED toggle now?
+
+---
+
+### Test 2: Verify Interrupt is Actually Firing
+
+Add a UART message in the callback to confirm it's being called:
+
+`/* USER CODE BEGIN 1 */
+extern UART_HandleTypeDef huart2;  // Declare external handle
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == GPIO_PIN_13)  // Button B1
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);  // Toggle LED
+        uint8_t msg[] = "Button Pressed!\r\n";
+        HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 100);
+    }
+}
+/* USER CODE END 1 */`
+
+**Expected result:**
+
+- Press button → LED toggles AND "Button Pressed!" appears in PuTTY
+- If you see the message but LED doesn't toggle → GPIO issue
+- If you see nothing → interrupt not firing
+
+---
+
+### Test 3: Manual LED Toggle Test
+
+Add this in `main.c` while loop to verify LED can be toggled:
+
+`/* USER CODE BEGIN WHILE */
+while (1)
+{
+    if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_RESET)  // Button pressed (active low)
+    {
+        HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+        HAL_Delay(200);  // Debounce
+        while(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_RESET);  // Wait for release
+    }
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+}
+/* USER CODE END 3 */`
+
+This uses **polling** instead of interrupts.
+
+- If this works → interrupt configuration has an issue
+- If this doesn't work → GPIO/hardware issue
+
+---
+
+**Which test do you want to try first?**
+
+1. Debounce delay in callback
+2. UART message in callback to verify interrupt fires
+3. Polling test in main loop
+
+I've tired 
+Test 1: Add Debounce Delay, and 
+Test 3: Manual LED Toggle Test
+
+The LED didn't response in either of them
+
+**LED not responding in polling mode = fundamental GPIO or hardware issue.**
+
+Since polling doesn't work, the interrupt isn't the problem. Let's diagnose systematically:
+
+---
+
+## Quick Hardware Check
+
+1. **Is LED2 physically functional?**
+    - Go back to your **bootloader project**
+    - The bootloader was blinking LED2 earlier with the test code
+    - Flash the bootloader → does LED2 still blink?
+    - **If YES:** LED hardware is fine, user app has GPIO config issue
+    - **If NO:** Hardware problem
+2. **Is BOOT0 still disconnected?**
+    - Verify no jumper wire on BOOT0 pin
+
+---
+
+## Code Diagnosis Tests
+
+### Test A: Force LED On at Startup
+
+Add this right after the UART message in `main.c`:
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+
+// Force LED on
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+HAL_Delay(2000);  // LED should be ON for 2 seconds
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+HAL_Delay(2000);  // LED should be OFF for 2 seconds
+/* USER CODE END 2 */`
+
+**Expected:** LED turns ON for 2s, then OFF for 2s at startup, then main loop starts.
+
+---
+
+### Test B: Verify GPIO Port and Pin Defines
+
+Check what `LD2_GPIO_Port` and `LD2_Pin` actually are. In `main.c`, add this before the while loop:
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+
+// Debug: Print GPIO info
+char debug_msg[100];
+sprintf(debug_msg, "LED Port: %p, Pin: %d\r\n", (void*)LD2_GPIO_Port, LD2_Pin);
+HAL_UART_Transmit(&huart2, (uint8_t*)debug_msg, strlen(debug_msg), 1000);
+/* USER CODE END 2 */`
+
+Add `#include <string.h>` and `#include <stdio.h>` at the top of `main.c` in the USER CODE BEGIN Includes section.
+
+**Expected output in PuTTY:** Something like `LED Port: 0x40020000, Pin: 32` (PA5 = GPIO_PIN_5 = 32)
+
+---
+
+### Test C: Direct Register Access
+
+Bypass HAL entirely and write directly to registers:
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+
+// Direct register access - turn LED ON
+GPIOA->ODR |= (1 << 5);  // Set PA5 high
+HAL_Delay(1000);
+GPIOA->ODR &= ~(1 << 5); // Set PA5 low
+HAL_Delay(1000);
+/* USER CODE END 2 */`
+
+**If this works but HAL doesn't:** HAL initialization issue
+
+**If this also doesn't work:** GPIO clock not enabled or deeper issue
+
+---
+
+## Most Likely Issue: Clock Not Enabled
+
+Check `MX_GPIO_Init()` in your user app - does it enable GPIOA clock?
+
+Look at lines 199-203 in your `main.c`:
+
+`__HAL_RCC_GPIOC_CLK_ENABLE();
+__HAL_RCC_GPIOH_CLK_ENABLE();
+__HAL_RCC_GPIOA_CLK_ENABLE();  // ← This MUST be here
+__HAL_RCC_GPIOB_CLK_ENABLE();`
+
+Verify `__HAL_RCC_GPIOA_CLK_ENABLE();` exists.
+
+---
+
+## Immediate Action:
+
+**Try Test A first** (force LED on/off at startup). This is the simplest diagnostic.
+
+Does the LED turn on/off with Test A?
+
+The green LED stays on
+
+**Critical finding: LED stays ON continuously!**
+
+This means:
+
+- `HAL_GPIO_WritePin(..., GPIO_PIN_SET)` works ✅
+- But `HAL_GPIO_WritePin(..., GPIO_PIN_RESET)` does NOT work ❌
+- LED never turns off after the first SET command
+
+---
+
+## This Points to a Specific Issue
+
+The GPIO is being **reconfigured or interfered with** between the SET and RESET commands.
+
+### Most Likely Cause: EXTI Configuration Conflict
+
+When you configure PC13 as **EXTI interrupt**, the CubeMX-generated code might be interfering with PA5.
+
+Let me check something - what's the **order** of initialization calls?
+
+Looking at your code:
+
+`MX_GPIO_Init();        // Line 90 - configures EXTI on PC13
+MX_USART2_UART_Init(); // Line 91
+// Then your test code`
+
+The `MX_GPIO_Init()` configures **both** PC13 (EXTI) and PA5 (LED). But there might be an issue with how the EXTI configuration affects the GPIO state.
+
+---
+
+## Test: Disable EXTI Temporarily
+
+Let's verify if EXTI is causing the problem.
+
+### Temporarily comment out EXTI interrupt enabling:
+
+In `main.c`, find the GPIO init function around lines 221-223:
+
+`/* EXTI interrupt init*/
+HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);`
+
+**Comment these out:**
+
+`/* EXTI interrupt init*/
+// HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+// HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);`
+
+Rebuild and test. Does the LED now turn ON for 2s, then OFF for 2s?
+
+---
+
+## Alternative: Check for HAL_Delay Issue in Interrupt Context
+
+Another possibility: The `HAL_Delay()` in the EXTI callback (line 221 in `stm32f4xx_it.c`) might be causing issues since `HAL_Delay()` relies on SysTick, and calling it from an interrupt with the same or higher priority can cause problems.
+
+But first, try the EXTI disable test above.
+
+**Does LED blink correctly with EXTI disabled?**
+
+can you check the file yourself
+
+**Read** C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\main.c (lines 189-228)
+
+**Read** C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\main.c (lines 228-247)
+
+**Found it! Line 220 is the problem:**
+
+`/*Configure GPIO pin Output Level */
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);`
+
+This line in `MX_GPIO_Init()` sets the LED to OFF **during initialization** at line 90.
+
+Then your test code:
+
+- Line 98: Sets LED ON ✅
+- Line 99: Waits 2 seconds
+- Line 100: Sets LED OFF
+- **BUT** somewhere between lines 98-100, the button interrupt is firing!
+
+---
+
+## The Real Problem: Button Bounce at Power-On
+
+When you power on or reset the board, the **button generates noise** that triggers the EXTI interrupt immediately. The interrupt callback (with `HAL_Delay(200)`) is blocking your main code execution.
+
+Here's what's happening:
+
+1. GPIO init enables EXTI interrupt (line 237)
+2. Button noise triggers interrupt
+3. Callback enters, toggles LED ON, then delays 200ms (line 221)
+4. Your main code sets LED ON (line 98) — but it's already ON from interrupt
+5. Button noise triggers interrupt AGAIN during your delay
+6. Callback toggles LED OFF, delays 200ms
+7. This loop continues, keeping LED stuck
+
+---
+
+## Solution: Disable EXTI Until After Your Test
+
+Add this to temporarily disable the interrupt during your test:
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+
+// Disable EXTI during test
+HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+
+// Force LED on
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+HAL_Delay(2000);  // LED should be ON for 2 seconds
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+HAL_Delay(2000);  // LED should be OFF for 2 seconds
+
+// Re-enable EXTI
+HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+/* USER CODE END 2 */`
+
+Or better yet, **remove the `HAL_Delay()` from the interrupt callback** since delays in ISRs are bad practice:
+
+In `stm32f4xx_it.c`, change to:
+
+`/* USER CODE BEGIN 1 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == GPIO_PIN_13)  // Button B1
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);  // Toggle LED
+        // Remove HAL_Delay - debounce in main loop instead
+    }
+}
+/* USER CODE END 1 */`
+
+**Try removing the `HAL_Delay(200)` from line 221 in the callback. Does LED blink correctly now?**
+
+am I doing both of these or just one of this
+
+"""
+/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+
+// Disable EXTI during test
+HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+
+// Force LED on
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+HAL_Delay(2000);  // LED should be ON for 2 seconds
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+HAL_Delay(2000);  // LED should be OFF for 2 seconds
+
+// Re-enable EXTI
+HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+/* USER CODE END 2 */
+"""
+
+"""
+In stm32f4xx_it.c, change to:
+
+/* USER CODE BEGIN 1 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == GPIO_PIN_13)  // Button B1
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);  // Toggle LED
+        // Remove HAL_Delay - debounce in main loop instead
+    }
+}
+/* USER CODE END 1 */
+"""
+
+**Do BOTH:**
+
+1. **Remove `HAL_Delay(200)` from the interrupt callback** in `stm32f4xx_it.c` (line 221)
+    - Delays in ISRs are bad practice
+    - This is causing the button bounce to block everything
+2. **Add the disable/enable EXTI** in `main.c` around your test code
+    - This prevents spurious interrupts during your startup test
+    - After the test completes, re-enable it for normal operation
+
+---
+
+## Here's the complete fix:
+
+### File 1: `stm32f4xx_it.c` (remove delay from callback)
+
+`/* USER CODE BEGIN 1 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == GPIO_PIN_13)  // Button B1
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);  // Toggle LED
+        // Debouncing handled in main loop or by hardware
+    }
+}
+/* USER CODE END 1 */`
+
+### File 2: `main.c` (disable EXTI during test, then re-enable)
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+
+// Disable EXTI during startup test
+HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+
+// Force LED on/off test
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+HAL_Delay(2000);  // LED should be ON for 2 seconds
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+HAL_Delay(2000);  // LED should be OFF for 2 seconds
+
+// Re-enable EXTI for button functionality
+HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+/* USER CODE END 2 */`
+
+---
+
+**After both changes:**
+
+- LED should blink ON (2s) then OFF (2s) at startup
+- Then button press should toggle LED without getting stuck
+- No more blocking delays in the interrupt
+
+**Try both changes and test!**
+
+the LED still stays on
+
+**LED still stays ON = the problem is NOT the interrupt.**
+
+Let me check if there's a hardware issue or register problem.
+
+---
+
+## Try Direct Register Manipulation
+
+Replace your test code with direct register access to bypass HAL completely:
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+
+// Disable EXTI during startup test
+HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+
+// Direct register access test
+GPIOA->BSRR = GPIO_PIN_5;  // Set PA5 high (LED ON)
+HAL_Delay(2000);
+GPIOA->BSRR = (uint32_t)GPIO_PIN_5 << 16U;  // Reset PA5 low (LED OFF)
+HAL_Delay(2000);
+
+// Re-enable EXTI for button functionality
+HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+/* USER CODE END 2 */`
+
+**Does this work?**
+
+---
+
+## If That Still Doesn't Work: Check ODR Register
+
+Add UART debug to see what's happening to the GPIO register:
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+
+// Disable EXTI during startup test
+HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+
+// Read and report ODR before/after
+char debug[100];
+
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+sprintf(debug, "After SET: ODR=0x%08lX\r\n", GPIOA->ODR);
+HAL_UART_Transmit(&huart2, (uint8_t*)debug, strlen(debug), 1000);
+HAL_Delay(2000);
+
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+sprintf(debug, "After RESET: ODR=0x%08lX\r\n", GPIOA->ODR);
+HAL_UART_Transmit(&huart2, (uint8_t*)debug, strlen(debug), 1000);
+HAL_Delay(2000);
+
+// Re-enable EXTI
+HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+/* USER CODE END 2 */`
+
+Add at top of main.c in USER CODE BEGIN Includes:
+
+`/* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include <string.h>
+/* USER CODE END Includes */`
+
+**This will show us if the ODR register is actually changing.**
+
+Expected output in PuTTY:
+
+`After SET: ODR=0x00000020    (bit 5 = 1)
+After RESET: ODR=0x00000000  (bit 5 = 0)`
+
+If ODR changes but LED stays on → hardware issue (LED stuck, wrong pin, etc.)
+
+If ODR doesn't change → HAL/register write problem
+
+**Try the direct register test first. What happens?**
+
+I tired both, both hang and green led stays on.
+
+this is from putty
+"""
+Hello From User Application
+After SET: ODR=0x00000020
+"""
+
+**FOUND IT!**
+
+The code **hangs after the first `sprintf` and UART transmit**. Look at your PuTTY output:
+
+- ✅ "Hello From User Application" appears
+- ✅ "After SET: ODR=0x00000020" appears (bit 5 is set, LED is ON)
+- ❌ **Nothing after that** — code is frozen
+
+The ODR register shows `0x00000020` which is correct (bit 5 = 1 = LED ON). So GPIO works fine.
+
+---
+
+## The Problem: Code Hangs During HAL_Delay or Next Operation
+
+The code stops executing after line 105. This means:
+
+1. GPIO works ✅
+2. UART works ✅
+3. **Something in the delay or interrupt system is broken** ❌
+
+---
+
+## Root Cause: SysTick or Interrupt Priority Issue
+
+When EXTI interrupt fires during `HAL_Delay()`, and both have the same priority (0), they can deadlock.
+
+Looking at your GPIO init (line 236):
+
+`HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);  // Priority 0 (highest)`
+
+And SysTick (used by `HAL_Delay`) also runs at priority 0 by default.
+
+---
+
+## Solution: Lower EXTI Priority Below SysTick
+
+Change the EXTI priority in `.ioc` file or directly in code:
+
+### Option 1: Fix in Code (Quick)
+
+In `main.c`, find line 236 in `MX_GPIO_Init()`:
+
+`/* EXTI interrupt init*/
+HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);  // ← Change this
+HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);`
+
+Change to:
+
+`/* EXTI interrupt init*/
+HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);  // Lower priority (5 > 0)
+HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);`
+
+**BUT** this will be overwritten when you regenerate code from `.ioc`.
+
+---
+
+### Option 2: Fix in .ioc (Permanent)
+
+1. Open `FastBit_Badweh_UserApplication.ioc`
+2. Go to **System Core → NVIC**
+3. Find **EXTI line[15:10] interrupts**
+4. Change **Priority** from `0` to `5`
+5. **Save and regenerate code**
+
+---
+
+## Quick Test Without Fixing Priority
+
+Remove the `HAL_Delay()` calls temporarily to see if that's the issue:
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+
+// Disable EXTI during startup test
+HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+
+// Test without delay
+char debug[100];
+
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+sprintf(debug, "After SET: ODR=0x%08lX\r\n", GPIOA->ODR);
+HAL_UART_Transmit(&huart2, (uint8_t*)debug, strlen(debug), 1000);
+// HAL_Delay(2000);  // ← Comment out
+
+HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+sprintf(debug, "After RESET: ODR=0x%08lX\r\n", GPIOA->ODR);
+HAL_UART_Transmit(&huart2, (uint8_t*)debug, strlen(debug), 1000);
+// HAL_Delay(2000);  // ← Comment out
+
+sprintf(debug, "Test complete!\r\n");
+HAL_UART_Transmit(&huart2, (uint8_t*)debug, strlen(debug), 1000);
+
+// Re-enable EXTI
+HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+/* USER CODE END 2 */`
+
+**If you see all three messages in PuTTY, the problem is definitely `HAL_Delay()`.**
+
+---
+
+**Try removing the delays first. Do you see all messages including "Test complete!"?**
+
+we are going in a rabit hole. 
+I just want to remember, do you remember what we are tyring to do?
+
+You're absolutely right. Let me refocus.
+
+---
+
+## What We're Trying to Do
+
+**Main Goal:** Port the STM32 bootloader course project from F446RE to F401RE, using CubeIDE instead of Keil.
+
+**Current Phase:** Phase 3 - Create and test the **User Application** project
+
+**What the User App Should Do:**
+
+1. Print "Hello From User Application" on USART2 at startup ✅ **This works**
+2. Toggle LED when blue button is pressed ❌ **This doesn't work**
+
+---
+
+## The Real Issue
+
+We got sidetracked debugging why the LED won't toggle. But for the bootloader course, **the button functionality is just a demo feature**. The critical requirements are:
+
+1. ✅ User app runs from `0x08008000` (sector 2)
+2. ✅ VTOR offset is set to `0x00008000`
+3. ✅ USART2 works (we see the hello message)
+4. ✅ Linker script relocated correctly
+5. ✅ Binary file generation enabled
+
+---
+
+## Decision Point
+
+**Option A:** Skip the button toggle issue for now, it's not critical for bootloader functionality. Move to Phase 4: Implement the actual bootloader code with commands (BL_GET_VER, BL_MEM_WRITE, etc.)
+
+**Option B:** Fix the button issue first (likely an EXTI priority or HAL_Delay deadlock)
+
+---
+
+**Which do you prefer?**
+
+- Continue to Phase 4 (bootloader implementation)?
+- Or fix the button issue first?
+
+User Application to work, summarize what should we modify and from what file?
+
+# User Application - Required Modifications Summary
+
+## Files to Modify
+
+### 1. **Linker Script** - `STM32F401RETX_FLASH.ld`
+
+**Change:**
+
+`FLASH (rx) : ORIGIN = 0x08008000, LENGTH = 480K`
+
+**Why:** Relocate app to sector 2 (after bootloader)
+
+---
+
+### 2. **Vector Table Offset** - `Core/Src/system_stm32f4xx.c`
+
+**Change (line ~108):**
+
+`#define VECT_TAB_OFFSET  0x00008000U`
+
+**Why:** Relocate interrupt vector table to match new flash location
+
+---
+
+### 3. **Main Application Code** - `Core/Src/main.c`
+
+**Remove all test/debug code, keep only:**
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+/* USER CODE END 2 */
+
+/* USER CODE BEGIN WHILE */
+while (1)
+{
+    /* USER CODE END WHILE */
+    
+    /* USER CODE BEGIN 3 */
+}
+/* USER CODE END 3 */`
+
+**Why:** Clean startup message, simple idle loop
+
+---
+
+### 4. **EXTI Callback** - `Core/Src/stm32f4xx_it.c`
+
+**Keep simple (no delay):**
+
+`/* USER CODE BEGIN 1 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == GPIO_PIN_13)
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    }
+}
+/* USER CODE END 1 */`
+
+**Why:** Simple LED toggle on button press (optional demo feature)
+
+---
+
+### 5. **Binary Output** - Project Settings
+
+**Enable:** Project → Properties → C/C++ Build → Settings → MCU Post build outputs → ☑ Convert to binary file (-O binary)
+
+**Why:** Generate `.bin` file for bootloader upload
+
+---
+
+## Summary
+
+- **2 critical changes:** Linker script origin + VTOR offset
+- **1 build setting:** Enable binary output
+- **2 cleanup tasks:** Simplify main.c, remove test code
+
+That's it. The app will run from `0x08008000` and can be uploaded via bootloader.
+
+can you check the "2 critical changes: Linker script origin + VTOR offset" and see if they are right
+
+**Grep** "FLASH.*ORIGIN" (in C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication, glob: *.ld)
+
+2 lines of output
+
+**Grep** "VECT_TAB_OFFSET" (in C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\system_stm32f4xx.c)
+
+4 lines of output
+
+## Results:
+
+### VTOR Offset ✅ Correct
+
+`#define VECT_TAB_OFFSET  0x00008000U`
+
+### Linker Script ❌ Bug Found!
+
+`FLASH (rx) : ORIGIN = 0x08008000, LENGTH = 512K  ← WRONG`
+
+**Length should be `480K`, not `512K`.**
+
+You changed the origin to `0x08008000` (32KB offset) but forgot to reduce the length. The linker thinks it has 512K of flash starting at `0x08008000`, which extends **past the end of actual flash** (`0x08080000`).
+
+This could cause `HAL_Delay()` to hang if any code/data gets placed in invalid memory.
+
+---
+
+### Fix:
+
+In `STM32F401RETX_FLASH.ld` line 48, change:
+
+`FLASH (rx) : ORIGIN = 0x08008000, LENGTH = 512K`
+
+To:
+
+`FLASH (rx) : ORIGIN = 0x08008000, LENGTH = 480K`
+
+Then **Project → Clean → Rebuild**.
+
+This might also fix your LED/HAL_Delay hang issue.
+
+why 512K -> 480K?
+
+**Because the total flash is 512K, but your app doesn't start at the beginning.**
+
+`512K total flash
+ - 32K reserved for bootloader (sectors 0-1)
+ = 480K remaining for user app (sectors 2-7)`
+
+Visually:
+
+`0x0800_0000 ┌──────────────────┐
+            │ Bootloader (32K) │  ← sectors 0-1
+0x0800_8000 ├──────────────────┤
+            │ User App (480K)  │  ← sectors 2-7
+0x0808_0000 └──────────────────┘  ← end of flash`
+
+With your current setting (`ORIGIN = 0x08008000, LENGTH = 512K`), the linker thinks flash extends to `0x08088000` — that's **32K past the actual end of flash** (`0x08080000`). If any code gets placed there, it could cause crashes or hangs.
+
+remember I'm using STM32F401RE
+
+Yes, the math is the same for STM32F401RE:
+
+- **STM32F401RE** = **512KB flash** (the "E" in F401R**E** means 512K)
+- Flash range: `0x08000000` to `0x0807FFFF`
+
+`512K total
+ - 32K bootloader
+ = 480K for user app`
+
+The fix is still:
+
+`FLASH (rx) : ORIGIN = 0x08008000, LENGTH = 480K`
+
+Fix it, clean, rebuild, and test. The `HAL_Delay()` hang might be caused by this.
+
+I changed it. LED still hang
+
+Let me check one more thing — the `USER_VECT_TAB_ADDRESS` define that gates the VTOR offset.
+
+**Read** C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\system_stm32f4xx.c (lines 89-118)
+
+**Read** C:\Users\Sheen\Desktop\Embedded_System\FastBit9_Bootloader\FastBit_Badweh_UserApplication\Core\Src\system_stm32f4xx.c (lines 171-190)
+
+**FOUND THE REAL PROBLEM!**
+
+---
+
+## `USER_VECT_TAB_ADDRESS` is NOT defined!
+
+Look at line 94:
+
+`/* #define USER_VECT_TAB_ADDRESS */   ← COMMENTED OUT!`
+
+This means:
+
+- Line 96: `#if defined(USER_VECT_TAB_ADDRESS)` → **FALSE**
+- Line 107-110: `VECT_TAB_OFFSET 0x00008000U` → **NEVER DEFINED**
+- Line 179-180: `SCB->VTOR = ...` → **NEVER EXECUTED**
+
+**Your VTOR is still at `0x00000000`, pointing to the bootloader's vector table, not your app's.** So when SysTick or any interrupt fires, it jumps to the **wrong handler** → crash/hang.
+
+---
+
+## Fix
+
+In `system_stm32f4xx.c` line 94, **uncomment** it:
+
+`#define USER_VECT_TAB_ADDRESS`
+
+Then clean, rebuild, flash, and test. This should fix both the `HAL_Delay()` hang and the LED toggle issue.
+
+Okay, the LED turns on and then off. it never turns back on
+
+and this is putty
+"""
+Hello From User Application
+After SET: ODR=0x00000020
+After RESET: ODR=0x00000000
+"""
+
+**Great progress! The `HAL_Delay()` hang is FIXED!**
+
+The LED test works: ON 2s → OFF 2s ✅, and both ODR messages appear ✅.
+
+---
+
+## Current Issue: Button Toggle Not Working
+
+After the test code, your `while(1)` loop uses polling (lines 121-126). The LED never turns back on when you press the button.
+
+**The problem:** You have BOTH polling in `main.c` AND EXTI callback in `stm32f4xx_it.c`. They conflict — the EXTI fires and toggles LED, then the polling code also toggles it back immediately.
+
+---
+
+## Fix: Pick ONE method
+
+Since your `.ioc` configures PC13 as EXTI, **use only the interrupt callback**. Clean up `main.c`:
+
+`/* USER CODE BEGIN 2 */
+uint8_t msg[] = "Hello From User Application\r\n";
+HAL_UART_Transmit(&huart2, msg, sizeof(msg)-1, 1000);
+/* USER CODE END 2 */
+
+/* Infinite loop */
+/* USER CODE BEGIN WHILE */
+while (1)
+{
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+}
+/* USER CODE END 3 */`
+
+Remove all the test/debug code. The EXTI callback in `stm32f4xx_it.c` handles the button toggle.
+
+Clean, rebuild, flash, and test. Does the button toggle LED now?
+
+Okay, 
+from putty "Hello From User Application"
+
+and 
+
+the green LED toggles when I pressd USER BUTTON
+
+**User Application is fully working!** ✅
+
+---
+
+## Phase 3 Complete - Summary
+
+| Test | Status |
+| --- | --- |
+| USART2 prints "Hello From User Application" | ✅ |
+| LED toggles on button press (EXTI) | ✅ |
+| VTOR offset `0x00008000` | ✅ |
+| Linker script origin `0x08008000`, length `480K` | ✅ |
+| `USER_VECT_TAB_ADDRESS` uncommented | ✅ |
+
+---
+
+## Key Lesson Learned
+
+The root cause of the LED hang was **`USER_VECT_TAB_ADDRESS` was commented out**, so `SCB->VTOR` was never set to `0x08008000`. All interrupts (including SysTick used by `HAL_Delay()`) were jumping to the wrong vector table → crash.
+
+This is a **CubeIDE-specific gotcha** — the course used Keil/System Workbench where `VECT_TAB_OFFSET` worked differently. In newer HAL versions, you must also uncomment `USER_VECT_TAB_ADDRESS`.
+
+---
+
+## Next: Phase 4 - Bootloader Code Implementation
+
+Ready to move on to implementing the actual bootloader commands in `FastBit_Badweh_Bootloader`?
+
+
+# Remaining Steps for STM32F401RE + CubeIDE
+
+---
+
+## What's Done ✅
+
+| Step | Status |
+| --- | --- |
+| Bootloader project created (CubeIDE, F401RE) | ✅ |
+| USART2 (PA2/PA3) command channel working | ✅ |
+| USART6 (PC6/PC7) debug channel working | ✅ |
+| CRC peripheral enabled | ✅ |
+| GPIO: PC13 button, PA5 LED configured | ✅ |
+| User App project created | ✅ |
+| User App linker: `0x08008000`, `480K` | ✅ |
+| User App VTOR: `USER_VECT_TAB_ADDRESS` + `0x8000` | ✅ |
+| User App USART2 + EXTI button working | ✅ |
+
+---
+
+## What's Left
+
+### Phase 4: Bootloader Code (in `FastBit_Badweh_Bootloader`)
+
+**Step 4.1: Enable binary output**
+
+- Project → Properties → C/C++ Build → Settings → MCU Post build outputs → ☑ Convert to binary
+- Rebuild → verify `Debug/FastBit_Badweh_Bootloader.bin` exists
+
+**Step 4.2: Add defines and macros** — `Core/Inc/main.h`
+
+- Command codes (`BL_GET_VER 0x10`, `BL_GET_HELP 0x11`, etc.)
+- F401RE-specific memory ranges:
+    - `SRAM1_SIZE = 96*1024` (not 128K like F446)
+    - `SRAM1_END = SRAM1_BASE + SRAM1_SIZE`
+    - No SRAM2 (F446 has it, F401 does not)
+    - `FLASH_SECTOR2_BASE_ADDRESS = 0x08008000U`
+- Function prototypes for all bootloader handlers
+
+**Step 4.3: Add UART aliases and globals** — `Core/Src/main.c`
+
+`#define C_UART &huart2   // Command channel
+#define D_UART &huart6   // Debug channel (huart6, NOT huart3)`
+
+- `bl_rx_buffer[200]`
+- `supported_commands[]` array
+
+**Step 4.4: Implement boot decision logic** — `Core/Src/main.c`
+
+- Replace test code in `main()` with:
+    - Button pressed → enter bootloader mode (`bootloader_uart_read_data()`)
+    - Button not pressed → jump to user app (`bootloader_jump_to_user_app()`)
+
+**Step 4.5: Implement core functions** — `Core/Src/main.c`
+
+- `printmsg()` — debug print via USART6 (not USART3)
+- `bootloader_uart_read_data()` — receive commands on USART2
+- `bootloader_jump_to_user_app()` — validate & jump to `0x08008000`
+- `bootloader_verify_crc()` — CRC32 packet validation
+- `bootloader_send_ack()` / `bootloader_send_nack()`
+- `write_to_address_in_flash()` — HAL flash write wrapper
+- `execute_flash_erase()` — sector erase (sectors 0-7 for F401RE)
+- `verify_address()` — validate flash/SRAM ranges (F401RE: 96KB SRAM, no SRAM2)
+- `get_mcu_chip_id()` — returns `0x0433` for F401RE
+
+**Step 4.6: Implement all 10 command handlers** — `Core/Src/main.c`
+
+1. `bootloader_handle_getver_cmd()` — BL_GET_VER
+2. `bootloader_handle_gethelp_cmd()` — BL_GET_HELP
+3. `bootloader_handle_getcid_cmd()` — BL_GET_CID (expect `0x0433`)
+4. `bootloader_handle_getrdp_cmd()` — BL_GET_RDP_STATUS
+5. `bootloader_handle_go_cmd()` — BL_GO_TO_ADDR
+6. `bootloader_handle_flash_erase_cmd()` — BL_FLASH_ERASE
+7. `bootloader_handle_mem_write_cmd()` — BL_MEM_WRITE
+8. `bootloader_handle_en_rw_protect()` — BL_EN_RW_PROTECT
+9. `bootloader_handle_mem_read()` — BL_MEM_READ
+10. `bootloader_handle_read_sector_protection_status()` — BL_READ_SECTOR_P_STATUS
+
+**Step 4.7: Build and verify**
+
+- Clean → Build → 0 errors
+- Flash → verify bootloader runs (button held = bootloader mode, released = jump to user app)
+
+---
+
+### Phase 5: Enable Binary Output for User App
+
+**Step 5.1:** Same as bootloader — enable binary output in `FastBit_Badweh_UserApplication`
+
+- Verify `Debug/FastBit_Badweh_UserApp.bin` exists
+
+---
+
+### Phase 6: Host Programmer Setup
+
+**Step 6.1: Get the Python host app**
+
+- Locate `STM32_Programmer_V1.py` from the course files
+- Install Python 3 + pySerial (`pip install pyserial`)
+
+**Step 6.2: Update host app for your setup**
+
+- Change COM port to **COM4** (your ST-Link Virtual COM Port)
+- Update expected chip ID to **`0x0433`** (if host validates it)
+
+---
+
+### Phase 7: Integration Testing
+
+**Step 7.1:** Flash bootloader to `0x08000000`
+
+- Use CubeIDE: Debug/Run the bootloader project
+
+**Step 7.2:** Flash user app to `0x08008000`
+
+- Use CubeIDE: Debug/Run the user app project
+- OR use STM32CubeProgrammer to flash `.bin` at specific address
+
+**Step 7.3:** Test boot decision
+
+- Reset (no button) → "Hello From User Application" on COM4
+- Reset + hold button → bootloader mode on COM4
+
+**Step 7.4:** Test bootloader commands via Python host app
+
+1. `BL_GET_VER` → version byte
+2. `BL_GET_CID` → `0x0433`
+3. `BL_FLASH_ERASE` → erase sector 2
+4. `BL_MEM_WRITE` → upload `FastBit_Badweh_UserApp.bin` to `0x08008000`
+5. Reset → user app runs from freshly uploaded binary
+
+---
+
+### Phase 8: Final Verification
+
+**Step 8.1:** Full IAP cycle
+
+1. Erase user app sectors
+2. Upload new user app binary via bootloader
+3. Reset → new user app runs
+
+**Step 8.2:** Test all remaining commands
+
+- `BL_GET_HELP`, `BL_GET_RDP_STATUS`, `BL_GO_TO_ADDR`
+- `BL_READ_SECTOR_P_STATUS`, `BL_EN_RW_PROTECT`
+
+---
+
+## F401RE-Specific Reminders (Don't Forget!)
+
+| Item | F446RE (course) | F401RE (yours) |
+| --- | --- | --- |
+| Debug UART | `&huart3` | **`&huart6`** |
+| Debug pins | PC10/PC11 | **PC6/PC7** |
+| Chip ID | `0x0421` | **`0x0433`** |
+| SRAM size | 128KB | **96KB** |
+| SRAM2 | exists | **does not exist** |
+| `USER_VECT_TAB_ADDRESS` | not needed (older HAL) | **must uncomment** |
