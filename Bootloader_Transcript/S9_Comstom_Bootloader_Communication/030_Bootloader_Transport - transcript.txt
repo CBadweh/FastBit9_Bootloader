@@ -1,0 +1,75 @@
+Hey, welcome back to the lecture. So, let's understand the transport protocol we use in our custom bootloader
+
+design.
+
+So, this is the high level diagram of how we communicate to the host from the Nucleo board.
+
+So, we will use in this case 2 USART peripherals of the STM microcontroller, One is USART2 and
+
+another one is USART3.
+
+So, we will use USART2 peripheral of the microcontroller in order to receive the commands which is sent by
+
+the host, as well as
+
+it sends the bootloader replies to the PC. And for this we can make use of the virtual COM port.
+
+Right?
+
+Because, when you connect the board to your PC you can see that the virtual COM port is already enumerated.
+
+So, that's because, the virtual COM port support is there on the board itself.
+
+And I already explained that the USART2 peripheral is actually used for virtual COM port support, right?
+
+on the board.
+
+So, that's why for this path we need not to use any USB to UART converter hardware at all.
+
+So, just you need to connect your Nucleo board to the PC, that's it.
+
+So, this path we can use it for sending bootloader commands and receiving bootloader replies.
+
+We can also use USART3 peripheral as a debug port. To get debug prints from the bootloader. Because, in
+
+the early development you can put some printf statements OK, in your code to see what exactly going
+
+on OK,
+
+when you call different functions.
+
+So, all those debug prints we can divert on this path to the PC. So, that's why it is just a unidirectional.So,
+
+bootloader to PC it will dump all the debug messages if you want.
+
+And for this path of course, you need USB to UART converter hardware in order to push data to the PC from
+
+the Nucleo board.
+
+And during our custom bootloader development you will come to know that OK, I almost don't use this path.
+
+OK.
+
+So, I'll make use of only this path.
+
+So, that means using of USB to UART hardware is optional
+
+for this course.
+
+So, if you don't have it and if you think you don't need it in future then, you need not to buy it.
+
+Great.
+
+So, that's about our bootloader loaders transport protocol.
+
+That means, a protocol used to transport data from a PC to bootloader as well as from bootloader to
+
+PC.
+
+And in ST's case, it's bootloader support various other transport protocols like USB, SPI, I2C etc.. But,
+
+for our case we just support this.
+
+And of course, you can extend this custom bootloader to support other transport protocols.
+
+You can always do that.

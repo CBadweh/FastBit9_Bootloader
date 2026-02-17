@@ -1,0 +1,81 @@
+All right.
+
+So, now first let's explore how sending NACK and sending ACK is implemented.
+
+So, let's go to our code block project and here is a function which implements bootloader_send_ack and
+
+bootloader_send_nack. So, sending nack is very very simple.
+
+We just use HAL_UART_Transmit API in order to send nack bytes.
+
+OK. So, this is a byte used to indicate it's a nack. All right.
+
+So, this is defined in main.h and it's value is 0x7F. So, when the host receives 0x7F
+
+it understands that it's a nack. And for the ack we use the byte 0xA5.
+
+So, these two are #defined in the main.h. In the main.c as I said these 2 functions
+
+are placed at the very end and sending ack is always of 2 bytes.
+
+So, this we have already discussed when we were exploring about the host and target communication or
+
+host and bootloader communication. Isn't it? For example,
+
+So, that is here. Right?
+
+So,when the bootloader sends ack it also sends another field or another byte which consists of a
+
+value, which is nothing but length to follow in the next reply.
+
+So, that's why sending of ack is always 2 bytes. So, the first byte is the code of the ack.
+
+All right.
+
+And the second byte is length to follow.
+
+So, length to follow will be mentioned in this argument follow length.
+
+And that's why, we send 2 bytes by using
+
+HAL_UART_Transmit function.
+
+So, but for nack there is only 1 byte will be sent.Because, there is no question of sending reply
+
+if CRC fails. Great.
+
+So, that's about sending ack and sending nack,
+
+and that is used here.
+
+And for this function we send 2 arguments,
+
+one is the command code. The command code is nothing but the first byte of the buffer.
+
+Then the second argument is length to follow.
+
+So, the length to follow will be decided by this function itself.
+
+All right. So, this is function specific or command specific.
+
+So, for this command the bootloader is going to send one to one byte as a reply.
+
+So this we have already documented in our document, isn't it? Supported
+
+command document. Isn't it? For get version the bootloader reply will be 1 byte.
+
+So, that's why I have written 1 here.
+
+So, that means we have added 2 more functions to our project. That is bootloader_send_ack and bootloader
+
+send_nack we have to add the prototype of these 2 functions. Isn't it?
+
+Otherwise, you will face some errors.
+
+So, I will just add the prototypes of these 2 functions.
+
+All right. So, I will add it in the main.h. Fine.
+
+So, let's go back to main.c and now let's explore about the bootloader verify CRC and the bootloader
+
+uart_write_data functions in the next lecture.

@@ -1,0 +1,399 @@
+Welcome back to the course and in this lecture we will see the BL_MEM_WRITE
+
+command.
+
+So, now this is the command which we use to perform the in application programming that is programming our microcontroller
+
+with a binary file of the program.
+
+And this is the command we use to perform that BL_MEM__WRITE.
+
+And this command is very very simple,
+
+and you see only 3 extra fields here.
+
+So, the base memory address the payload length and the payload.
+
+So, this command you can use to program your Flash or SRAM 1 or SRAM 2 whatever.
+
+OK. So, you can use for all those in order target
+
+all those memory areas.
+
+But, in this course we will use this command to program the flash memory with the user application.
+
+Now, base memory address here means it's a 4 byte address indicated by the host from which a bootloader
+
+should start writing into the memory.
+
+All right.
+
+And the payload length is how many bytes are there in the payload field.
+
+So, as I said the payload length is only 1 byte.
+
+So, that's why the maximum value of this field can be 255.
+
+So, that's why,
+
+there can be only 250 bytes in this payload field.
+
+Right?
+
+So, now the reply for this command will be 1 byte, that is the status of the operation.
+
+That is the error code whether it's a success or failure error code.
+
+All right. Now, first we will implement the handle function for this command in our bootloader application,
+
+then we will test this command.
+
+Now, let's go to our bootloader project.
+
+All right.
+
+So, this is bootloader handle memory write
+
+command.
+
+All right.
+
+So, here where we handle the memory write
+
+command in the bootloader and it is very very simple exactly like before.
+
+All right.
+
+So, here we check the CRC and after that we send the Ack and then we verify the address,
+
+If everything is fine then we execute this code block.
+
+This is the place where we call execute_mem_write.
+
+So, this is the main function of this handle function.
+
+So, if the verify address fails then we will inform the host that the address was invalid
+
+by sending this status as address invalid.
+
+Now, let's go and check
+
+what is this execute_mem_write. Now,
+
+for this we are going to send the memory address, the payload length, and the payload starting address.
+
+So, that means we are going to send this information, payload length information and payload
+
+address to this execute_mem_write function.
+
+Now, let's see how that is implemented.
+
+Now, let's go to execute_mem_write.
+
+All right. Here it is.
+
+So, this function writes the contents of the buffer to memory address.
+
+That means, starting from this memory address byte by byte.All right.
+
+So, we program
+
+byte by byte.
+
+Now, here there are some notes
+
+currently this functions supports writing to Flash only.
+
+All right.
+
+So, I have not included you know programming the RAM and executing code from the RAM. You can do that
+
+no problem
+
+instead of sending to flash. You can write a small function which copies bytes to the RAM.
+
+All right. So, you can do that. Now,
+
+This function does not check whether "mem_address" is valid address of the flash range.
+
+So, I just assume here that the mem_address falls in the correct flash range.
+
+All right. You can see here, this is a very simple function. Isn't it? Where I use the API HAL_FLASH_Program from
+
+the flash driver of the ST's hardware abstraction layer.
+
+Now, here I just run the loop for length value and I program the content of this address.
+
+All right.
+
+Byte by byte.
+
+That's it starting from here.
+
+All right.
+
+So, this is a mem_address that is the base address and this is the content.
+
+And here I'm instructing this API in order to carry out
+
+byte by byte.
+
+That's it.
+
+Then I returned the status of that operation.
+
+So, now how to program the flash
+
+again you have to take a look into the reference manual.
+
+All right.
+
+So, here it is. This API programs the flash according to this procedure flash memory programming
+
+sequence.
+
+So, you have to go through this document in order to understand how exactly that API programs the flash
+
+memory. And remember that,
+
+So, we have to unlock the flash module to get control of the registers.
+
+All right. So, that's why I have used HAL_FLASH_Unlock and HAL_FLASH_Lock after that.
+
+So, it's very simple.
+
+Now, let's test this handle function.
+
+Now, how to test this?
+
+What will do is we have our user application. Isn't it?
+
+Now, we will create a binary file out of that.
+
+So, then we will ask our host application to read that binary file, in order to send all the contents of
+
+that binary file to the target by using this command.
+
+So, this command can transport 250 bytes in one go. Isn't it?
+
+So, our binary file may be more than let's say 5 kilobytes or 2 kilobytes. Than a host application
+
+will repeatedly use this command to transport bytes to the bootloader.
+
+So, then so whenever bootloader receives this command, it will program the contents of this payload OK
+
+into the memory indicated in the base memory address field.
+
+So, now let's test this so for this we should have a binary file, isn't it? bin file.
+
+Now, let's create that.
+
+OK.
+
+Now, let me go to Keil now
+
+and this is our user application. Right? So, now
+
+let me open the user application.
+
+So, this is our user application. Isn't it?
+
+So, which print something over the virtual COM port, that is hello from user application.
+
+Now, let's rebuild this code in order to generate a binary file.
+
+Now, if I just click a download here.
+
+All right.
+
+So, what ID does? It will just download this code onto the flash in the base starting from the address which we
+
+have mentioned here.
+
+Right?
+
+This one.
+
+So, this is a base address we have mentioned, isn't it?
+
+This is the address of the sector 2.
+
+Now, instead of downloading from here.
+
+So, what will do is, we will use the binary of this application in order to program through our host application.
+
+So, before that we have to create a binary of this project. Isn't it?
+
+All right.
+
+So, in Keil you can use this command in order to generate the binary file.
+
+So, here what we do is we use the command from elf.
+
+So, we use this executable in order to generate the binary file out of the elf file.
+
+All right.
+
+So, the elf file which is generated by the keil will be in the format dot axf.
+
+All right.
+
+For example,
+
+when I compile my code here we can see that it has generated axf file in the folder this one.
+
+So, this axf file contains code as well as lots of debug information.
+
+So, that's how you are able to debug the code on the target.
+
+All right.
+
+Now, you can also use Keil to generate the Intel hex format.
+
+For example, if you go to output and if you check create HEX, then it will also create Intel hex format.
+
+But, there are no such options to create a binary file.
+
+So, I searched every where, but I couldn't be able to find any options. All
+
+right.
+
+So, if you know you can tell me one way to generate binary file is by using the fromelf executable
+
+of the Keil toolchain.
+
+Now, for this you have to mention the input file name
+
+that is what we generated here,
+
+that is the axf.
+
+And then you have to mention this argument to the fromelf binary, that I want to create
+
+the bin file and you have to mention the output file name with the extension bin.
+
+So, if you do this it will create the binary file.
+
+Now, let's try now the input file name
+
+is this one. Right? So, that's the elf format
+
+what we generated here. And after that this is the output,
+
+So, here we can do any name.
+
+But, I have just given user_app.bin this is my output and this is the command.
+
+All right.
+
+Great.
+
+Now, let's test this.
+
+So, copy this command and go to Keil and go to options for target,
+
+then click on user.
+
+OK. So, now here you see this option after build.
+
+So, that means after build you are instructing the Keil to run these commands
+
+Run 1, Run 2.All right. So, check Run 1 and paste that command.
+
+So, now click OK and then try to build again.
+
+And here we can see it has executed this command fromelf.
+
+Oh there is an error.
+
+Could not open file this one.
+
+All right. So, that means it is not able to locate this file.
+
+Why?
+
+Will let's check, where exactly this file is present.
+
+Now, let me just open the open containing folder and this is my project.
+
+It must be in MDK-ARM.
+
+So, it is there inside this folder.
+
+You can see here .axf, here it is. It is there,
+
+but I think we have to give the full path.
+
+I'm not sure I will just copy this folder name.
+
+Let's see that works or not.
+
+I'll just paste this folder name.
+
+Now, let's see whether it's a valid format or not.
+
+So, now let me just remove this, paste that OK. Now, let's try to compile. Yes, it has generated the binary file.
+
+Now, let's check.Now,
+
+let's go to project directory
+
+and here it is the bin file is generated.
+
+So, you cannot open this with the notepad.
+
+OK.
+
+So, because it's a binary file. That means it contains only the fewer of code for your application. All right.
+
+Now,
+
+you can open this with the hex editor.
+
+I have a hex editor here. So, I can open that and all right.
+
+So,it's my trial version.
+
+All right.
+
+So, let's continue. Now, here it is.So,
+
+this is the binary file.
+
+So, this is pure of code of your code.
+
+This is the MSP value, right?
+
+So, this is 08 00 18 81 d9.
+
+So, this is a address of the reset handler,
+
+and this is the address of the next exception handler.
+
+So, basically these are the vector table.
+
+Isn't it? That means it's a pure hex code for your application.
+
+So, this is not in the intel hex format remember.Grate.So, this is the pure binary now.
+
+So, what's the size? Size is
+
+4792 bytes.
+
+So, that means I have to execute my mem_write
+
+command.
+
+How many times?
+
+4792 divided by 255.
+
+We have to execute that command 19 times. Because each time our bootloader memory write command carries
+
+255 bytes. Isn't it?
+
+So, this application totally has 4792 bytes.
+
+All right.
+
+So, now in the next lecture we will test this command.

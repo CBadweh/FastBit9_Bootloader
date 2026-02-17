@@ -1,0 +1,209 @@
+Hey, welcome back to the course.
+
+So, in the previous lecture we created CubeMX project for our bootloader work,
+
+and we actually included all these initialization functions.
+
+Actually, the CubeMX software has automatically inserted lots of initialization functions like HAL_Init
+
+GPIOs,
+
+and initialization code for UART as well as CRC and also for the clock. Isn't it?
+
+So, we also tested the UART a working and our Task2 is to test the section. In this task whenever
+
+we reset the micro-controller the bootloader code which is stored in the sector 0 and 1 will
+
+run first.And then the bootloader code will check the status of the user button.
+
+So,if the user button is pressed that is yes, then that means if the user button is pressed during
+
+reset of the microcontroller or board, then bootloader will execute this function bootloader
+
+uart_read_data().
+
+OK.
+
+And if the user button is not pressed during resetting of the board, then this path will be executed,
+
+that is the bootloader will execute bootloader_jump_to_user_app().
+
+So, that means this is the place where bootloader will hand of control to the user application,which is
+
+stored in the sector 3 onwards.
+
+OK of the flash memory. This is the design in this custom bootloader that is whenever you reset the microcontroller
+
+the bootloader code always runs first, and based on the user button status.It will take a decision whether
+
+to continue in the bootloader mode or give control to the user application.
+
+Great.
+
+Now, let's implement this.
+
+So, let's implement our Task 2 the moment we reset the board,
+
+the bootloader actually runs first. And if we press the button then the bootloader should continue in
+
+the bootloader mode and if the user doesn't press on board button, than it should jump to the user application.
+
+Here, is a code to take that small decision.
+
+So, here just take a look.
+
+So,here I am first reading the status of the button and if the button is pressed, then in Nucleo board pressing
+
+means making that GPIO to ground.
+
+OK.
+
+In STM32F446 Nucleo
+
+OK, pressing a user button means making that GPIO to ground.
+
+So, this may not be true on all the Nucleos.
+
+Suppose, if you consider discovery board from ST, pressing a button means making it high.
+
+High voltage.
+
+So, there may be differences in the board so you have to check how your button is connected between
+
+the VCC and the ground. And you should know, what exactly happens when you press the button whether
+
+it drives it to 0, or whether it drives it to high voltage OK, Nucleo it drives it to ground.
+
+So, that's why if that button reads 0 then the button is pressed.
+
+Then, I call the function bootloader
+
+uart_read_data().
+
+That means, bootloader continues in the bootloader mode and it tries to read the command in the boot loader
+
+uart_read_data function OK, that implementation will see later.And if you don't press it,
+
+So, then what happens is bootloader should jump to the user application. So, where user application is stored?
+
+As we discussed user application is stored in the sector number 2.
+
+So, this is the base address of the sector 2 and you have to jump over there and you have to execute
+
+the application.
+
+OK.So, that means that now to test this we need a user application. Isn't it?
+
+So, this is our bootloader code, right?
+
+So, the bootloader has to jump to another application when the button is not pressed.
+
+That means, we have to write a small another application lets say which blinks some on board LED's,
+
+and the bootloader should give control to that application,
+
+if the button is not pressed. Now, let's include this code segment into our bootloader project.
+
+All right. So, I'm coming back to my bootloader project.
+
+OK. So, in the previous lecture we tested this print message function. Isn't it?
+
+Now, let's remove that OK, so because we don't need that anyway
+
+we tested it and
+
+OK. So, now let me jump to some bigger IDEs.
+
+Now, let me use code block for that to describe the source code.
+
+This is the same code
+
+OK, but I just opened in the code block.
+
+So, now I am in the main now, main of the bootloader and here.
+
+So, let me remove all this code
+
+OK. So, this is still main.
+
+So, I just remove those code and let me put that decision making code here,
+
+OK the main. Grate.
+
+All right.
+
+So, now we have to implement these two functions. Isn't it?
+
+So, now let's implement that here,
+
+Let's copy this and let me just write here,
+
+OK. void, let's keep it empty.
+
+No problem.
+
+OK, for a time being
+
+and let's copy this also. So, now we have to add the function prototypes of these two functions.
+
+OK.So, for that let me create a main.h first. Now, let me go to the Keil IDE
+
+and here we actually have a main.h.
+
+The CubeMX software has already added a main dot.h OK. So, just open that OK so here it is.So, now
+
+let me see where exactly it is present.
+
+OK. So. here in the Inc folder.
+
+OK.
+
+So, now let me just drag that and add it to my Core block IDE.
+
+OK. So, now let's add the function prototype let me add it in the header.
+
+OK.
+
+So, now let me add it here prototypes.
+
+OK.
+
+Here it is. So, now let's add this is also. Great.
+
+So, now let's go back to the Keil and let's see everything is fine or not.
+
+Yes, we indeed the code is present here,
+
+and let's compile.
+
+All right.
+
+The compilation is proper and let's download this code OK and we will keep 2 break points here.
+
+Debug this code and let me hit run,
+
+and
+
+Yes, it comes to button is not pressed, that's true. Because the button is not pressed.
+
+So, now let me keep a break point here and reset the board and this time I'll press and hold the user
+
+button of the board and let me hit run and let me remove this.
+
+And yes, it is now showing the button is pressed.
+
+OK, great.
+
+So, it's working. Fine.
+
+So, now in the next lecture we will add these two function contents.
+
+OK.
+
+In the next lecture, first we will implement how to jump to user application which is present
+
+in another sector of the flash.
+
+After that, I will cover how we can read that data that is command coming from the host.
+
+See you in the next lecture.

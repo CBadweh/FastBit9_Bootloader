@@ -1,0 +1,129 @@
+Hey, welcome back to the lecture.
+
+So, in the previous lecture you saw that bootloader can able to communicate with the host over USART peripheral,
+
+or CAN, SPI, I2C, USB etc..
+
+So, now I will demonstrate you how you can communicate with the bootloader over the USART peripheral.
+
+So, just connect your board to the PC and then check in the Device Manager section here, and you see that
+
+the board is indeed detected and it is saying that it's a virtual COM port
+
+(COM3). But, unfortunately we cannot communicate with the bootloader over this virtual Com Port.
+
+That's because,
+
+So, if I open my Nucleo's User Manual and if I go to the USART section, here the USART communication.
+
+And here, what they have mentioned is the USART2 interface available on PA2 and PA3 on the
+
+STM32 microcontroller can be connected to ST-LINK MCU.
+
+So, that means what you are seeing here, that is Virtual COM Port,
+
+this actually belongs to the USART2 peripheral.
+
+But unfortunately, what we see in the system memory boot mode guide, here It clearly says that the bootloader
+
+which is sitting in the STM32F446 microcontroller, doesn't support communicating over the USART2 peripheral.
+
+So, that means you have to check your boards user manual, OK, Which USART peripheral is utilized for
+
+this
+
+Virtual COM connection.
+
+If it is USART1 or USART3, then you can communicate to the bootloader over this interface from
+
+the host.
+
+No problem.
+
+So, but on the Nucleo board since USART2 is utilized for this Virtual COM port. You cannot use
+
+this interface in order to talk to the bootloader of the board.
+
+So, you really have to check that in your User manual.
+
+So, that means you have to use one USB to UART converter hardware in between. OK. In order to talk to the
+
+board over UART from the PC.
+
+So, these are very cheap hardware's, USB to UART converter so you can buy it or you can it reuse it if you
+
+have one.
+
+All right.
+
+So, now let's go back to system memory document.
+
+Now, what will do is, we will use a USART3 peripheral in order to talk to the bootloader.
+
+So, here the USART3_RX pin will come over PC11 and USART3_TX pin will come over
+
+PC10 of the microcontroller.
+
+So, you have to search for PC11 and PC10 in your schematic.
+
+So, let's go to a schematic and let me search PC10.
+
+So, here it is PC10 and PC11
+
+they are available at 1 and 2 pins of the CN7 converter.
+
+So, you can even perform this action on let's say USART1 peripheral no problem.
+
+And the USART3 peripheral
+
+you can also bring in on PB10 and PB11, that's also possible.
+
+So, but let me do it on PC10 and PC11.
+
+So, PC 10 is actually the TX. So, let's say here one pin is PC10 and another one is let's say
+
+PC11.
+
+So, PC10 is actually TX, that is TX from the board end. Isn't it?
+
+So, PC10 should go to the RX pin of your USB to UART converter. And PC11 is actually RX. So,
+
+that's why that PC11 pin you have to connect to the TX pin of the USB to UART converter. And this ground
+
+pin you have to connect to one ground point here.
+
+That's it.
+
+And this you will the connect to the PCs USB port.
+
+This much connection you have to do.
+
+Then what will do is we will run some application here and then we can talk to the bootloader which is
+
+running on this MCU over USART interface.
+
+And after doing this you have to download one application from ST's official website, STM32 Flash
+
+loader demonstrator
+
+and I have given you the link,
+
+just go through that link and download this software here, and you have to login or register in order to download
+
+that.
+
+And once downloaded we will have this Zip folder here. OK. And you will see one Windows application,
+
+so unfortunately doesn't support Mac or Linux.
+
+So, if you are running Mac or Linux, then you may have to download some open source flash loaders. OK? Because,
+
+officially ST has not released this application for Windows and Mac users.
+
+And it's OK. If you don't get a chance to run this demo application,
+
+No problem.
+
+So, you can just watch the video and skip doing it. No problem.
+
+And install this software and I'll see you in the next lecture.

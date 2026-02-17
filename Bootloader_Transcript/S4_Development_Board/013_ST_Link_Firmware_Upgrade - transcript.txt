@@ -1,0 +1,107 @@
+All right.
+
+So. here is a web page from where
+
+you can download the ST-Link firmware upgrade software.
+
+OK.
+
+So, this is a software given to all the platforms such as Windows, Mac, and Ubuntu, in order to do the firmware
+
+upgrade of the ST-Link.
+
+And here you can see, it can do the firmware upgrade for ST-Link.
+
+ST-LINK/V2
+
+and ST-LINK/V2-1.
+
+So, here is a confusion.
+
+So, here they say that, it is ST-LINK/V2-A and here they say it as ST-LINK/V2-1.
+
+Here is a naming mismatch but please note that, that V2-A is nothing but V2-1.
+
+OK. So, now you go at the end and download the software. So, let's click on get software and you have to accept the agreement,
+
+and you have to login in order to download the software.
+
+If you don't have any account then you have to create one.
+
+All right.
+
+So, here I have downloaded the archive and if your windows go and execute this ST-Link upgrade software.
+
+So, if your using any other platforms then you can simply run this.
+
+You can simply run this exec utable jar file OK. Since, it is a jar file it can run on Linux as well as on Macs.
+
+So, simply double click on this.
+
+All right.
+
+And when you do that,
+
+So, now I'm on Windows and I have not connected my board to the PC, and I'll just run this and here it
+
+is.
+
+It is not showing anything,
+
+and now I connect it.
+
+I connected my board and I click on refresh device list and now it has detected that my board is actually
+
+old board,
+
+actually I connected my discovery board.
+
+That is actually a old board which contains ST-LINK/V2 version.
+
+OK. And then click on Open in update mode.
+
+And here you can see that, the firmware version which is running on my board is this one and the latest
+
+available is also that one only because, I updated it.
+
+You may see mismatch here.
+
+So, in that case you have to update to the latest firmware version.So, just click on upgrade and it will
+
+upgrade the firmware which is running on the ST-Link micro-controller. And if you are using newer board
+
+than it may show you V2-1 instead of V2. Great.So, now the upgrade is successful,
+
+close it and restart your microcontroller.
+
+Great. So, that's for discovery and if you have Nucleo board, then also the procedure is same, the software
+
+is same, and this Nucleo board is actually based on ST-LINK/V2 debugger and programming.
+
+So, because Nucleo came after discovery so that's why, it comes with V2-1.And for that also
+
+now what I do is, I will just run that ST-LINK once again,
+
+and now I connect my board,
+
+let's see what happens.
+
+So, now I click on refresh device list and here it is, it is showing V2-1. And OK, it is showing that
+
+firmware version unknown,
+
+So, just click on Open in update mode and just wait until it install some drivers.
+
+OK. So, now it is saying that the current firmware version on the board is 28, available is 29.
+
+So, now just click on upgrade to the newer firma ware
+
+version.
+
+Now, the upgrade is successful.
+
+Just close this and restart your microcontroller.
+
+So, great.
+
+So, these firmware upgrade step has to be done in order to use your board successfully with this course.

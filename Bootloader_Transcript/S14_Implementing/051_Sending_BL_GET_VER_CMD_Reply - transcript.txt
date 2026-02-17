@@ -1,0 +1,103 @@
+In the previous lectures we have already explored the bootloader verify CRC, the sending of Nack as
+
+well as sending of Ack. Isn't it?
+
+So, now in this code block we have to explore get_bootloader_version and bootloader_uart_write.
+
+So, here is a function where it obtains the reply.
+
+All right.
+
+So, what is the reply in this command.
+
+So, the bootloader just sends the version of this bootloader, that's it. And this function I have implemented
+
+at the end here.
+
+All right.
+
+So, get_bootloader_version.
+
+So,it just returns the macro value that is bootloader version.
+
+So, this is actually decided by you.
+
+So, this is a simple macro defined in main.h.
+
+So, let's #defined to 0x10.
+
+That means the version is 1.0.
+
+So, you can mention anything you want.
+
+Great.
+
+And the next function is this one bootloader
+
+uart_write_data.
+
+So, this is a function which sents reply back to the host
+
+over the command UART, that is our UART2.
+
+All right.
+
+So, again this is very very simple function,
+
+which just uses the HAL
+
+UART_Transmit function of
+
+the UART
+
+driver of the ST.
+
+So, it just sends the data
+
+over the UART2.
+
+And the argument for this function is very very simple,
+
+the buffer that is the data buffer and the length, that's it. And the same thing we give it to the
+
+HAL_UART_Transmit function. That's it.
+
+So, whenever you want to send any data to the host over the command UART just call this function.
+
+That's it.
+
+OK.
+
+It is just a wrapper function for
+
+HAL_UART_Transmit. Great.
+
+Now, let's go back to our handling of get version command.
+
+So, let me just repeat once again very quickly.
+
+So, whenever bootloader calls this function first we verifiy the CRC and if the CRC is good, then we
+
+first send the Ack + length to follow information and then we get the reply.
+
+In this case, it is just you know sending the value of the bootloader version that's it. And then we call
+
+bootloader
+
+uart_write_data function in order to send that reply.
+
+In this case, it is just a bootloader version.So,
+
+that's why I'm sending the address of that variable and 1 byte we have to send.So,
+
+That's why, I have mentioned it as 1. And if this is CRC fails, then we just sent Nack.
+
+All right.
+
+Great.
+
+So, now in the next lecture what we'll do is, we will compile this code to see whether everything is fine
+
+or not, and we will test only this command by using our host application.
+
+I will see you in the next lecture.

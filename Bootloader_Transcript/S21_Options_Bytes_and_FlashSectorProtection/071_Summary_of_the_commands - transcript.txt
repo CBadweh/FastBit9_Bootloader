@@ -1,0 +1,131 @@
+Hey, welcome back to the lecture. And we have so for completed almost all the commands and which
+
+I taught I will cover in this course.
+
+And of course, the bootloader project needs some more improvements and more commands can be added.
+
+There are lots of other features can be added like security, encryption etc..
+
+OK.
+
+And now, we have come to an end and we have almost reach to the end of this project,
+
+and let me quickly test whether all the commands are indeed working or not,
+
+or we messed up something.
+
+So, now let me reset my board.
+
+The bootloader code is running.
+
+Let me just check one by one.
+
+The first Get version command, it's working.
+
+And Get help
+
+command,
+
+It's working.
+
+All right.
+
+So, we got the reply and 3rd one is CID.
+
+Let's see.
+
+Yes, it's working.
+
+And the fourth one is Get RDP status.
+
+Let's see it's working.Now,
+
+5th one is
+
+Go To address.
+
+All right.
+
+So, we have to jump to some address. Right?
+
+So, let's give the reset handler address 80081D8..
+
+All right.
+
+So, let's hit enter
+
+and you can check.
+
+So, let's close this application let's open TeraTerm.
+
+All right. So, let's check in the TeraTerm.
+
+Yes, It's
+
+working.All right.So, It's executing.
+
+Now, let's disconnect this. Grate.
+
+So, the next command is MASS_ERASE 6, 1.
+
+So, that is actually not supported.
+
+And now FLASH_ERASE is 7.
+
+Let's see, what is that 7 is Flash erase.
+
+Enter sector number.
+
+OK. So, sector number.
+
+Let's say 2, enter number of sectors
+
+1 and it is success.
+
+Now, let's check in the
+
+Flash utility.
+
+Not this one, this one.
+
+Yes, it is FF. Right?
+
+It's a working. Now, then press any key to continue the next command is MEM_WRITE. Isn't it? 8
+
+Enter the address.
+
+So, we will give the bas e address affected to 0x08008000 and let's check connect. Yes.
+
+It is written. Grate.
+
+Now let's disconnect, now press any key to continue and the next command is read/write
+
+protect.
+
+OK. So, which I have already shown you in the previous video.
+
+Let's check the sector status 11.
+
+All right.
+
+OK.
+
+So, after writing you have to actually restart the bootloader.
+
+All right.
+
+So, I don't know whether it's a bug or I have to fix this issue.
+
+So, now press any key to continue.
+
+OK 11. Let's press 11
+
+and these are the protection status on the sectors.
+
+Great.
+
+So, all the commands are working as expected and try this at your desk and in the next lecture I
+
+will explain about the host applications. And what each file does
+
+in the project OK.

@@ -1,0 +1,185 @@
+Hey, welcome back to the lecture.
+
+And in this lecture, let's test the bootloader memory write
+
+command.
+
+So,we have to now flash the binary we just generated using our command. Isn't it? Remember that, the binary
+
+what you generated after compiling this project.
+
+So, you generate a binary Isn't it?
+
+So, that binary you have to place in the same directory,
+
+where your python script,
+
+or your
+
+C application executable is stored.
+
+OK.
+
+So, for example, here I have the python host application here. So, here only you have to keep that binary
+
+and you have to give the name user_app.
+
+OK. So, just copy the binary you generated in this project to the place where host application is stored.
+
+OK.
+
+All right. So, now let's execute this script, let me enter the COM port.
+
+OK. So, now first of all as you know we are going to program into the sector 2. Isn't it?
+
+So, let's first erase that.I mean this is not required
+
+you need not to erase it, but to make sure that we indeed program that sector.First,
+
+let's erase that.
+
+OK. Let's make sure that that is erased.
+
+So, I'm going to enter the command 7 here. So, that is the FLASH_ERASE and the sector I'm going to erase
+
+is 0, 1, 2.
+
+OK. And enter the number of sectors let's enter 2.
+
+And here you can see that Erase status is success. Great.
+
+So, now let's check.
+
+Let me connect the ST-LINK and let's check 0x800,
+
+OK. So, that is FF and C00.
+
+So, that is also FF.That is actually sector 2 and sector 3. Grate.
+
+Now, let's disconnect and let's go back and press any key to continue,
+
+and now let's run the BL_MEM_WRITE
+
+command, that is 8. OK. And enter the memory right address here.
+
+So, the base address of the sector 2 you have to mention 0x08008000 and OK.So, there is
+
+a problem.
+
+There's a problem.
+
+The problem is the bootloader is not responding.
+
+So, that's because I placed this issue that, when I connect and disconnect the ST_LINK the bootloader
+
+stops responding. I need to debug this but whenever you connect and disconnectthe ST_LIMK you have
+
+to reset the board.
+
+OK.
+
+This problem arises only when you use ST_LINK. So, let me just reset the board once again.
+
+Fine. That's fine.
+
+Let me again run and let me enter COM3 and 000. Great.
+
+Hit enter.
+
+And here you can see that, the host application has sent so many packets to the bootloader and each
+
+packet contains 255 bytes as a payload which is nothing but the content of the binary.
+
+So,here you can see that, it also prints the bytes so for sent as well as bytes remaining.
+
+OK.
+
+And at the end you can see that, it actually sent in total 4792 bytes.
+
+OK.
+
+And in each packet it transfers 255 bytes from that user_app.bin.
+
+All right.So. now we have just programmed the binary.
+
+Now, let's trigger that binary.
+
+So, how to trigger? Simple, let's execute the go to command.
+
+OK.
+
+Now, let's press any key to continue and
+
+now, let me type the command code 5,
+
+and what is the reset handler address?
+
+That is 0x080081d8. isn't it?
+
+So, that's the address of the reset handler. Isn't it?
+
+So, let's confirm that.
+
+So, let's go back to user_app and let's open this in the hex editor.
+
+All right.
+
+So, zero.
+
+So, this is actually these 4 bytes
+
+actually the MSP value and this is the reset handler 08 00 81 d8.
+
+OK. So, d9 you have mention it as d8.
+
+So, now 81.
+
+OK.So, 81 d8.
+
+Isn't it? right?
+
+Correct.
+
+So, now let's hit enter,
+
+and address status is 0, that means success.
+
+Now, our code must be running.
+
+Now, let's check.
+
+Now, let me close this
+
+and let me open the Tera Term.
+
+Let's set the baud rate,
+
+and here it is the application indeed running.
+
+So, we just programmed using BL_MEM_WRITE command into the sector 2 of the user flash.
+
+And then we used the bootloader go to command in order to trigger the execution of the reset handler
+
+of that application.
+
+Great.
+
+And you can also use this command to store binary on different sectors of the user flash and use the
+
+go to command in order to execute that.
+
+OK.
+
+All right.
+
+That's about the implementation of BL_MEM_WRITE command and try with the different binaries
+
+OK.
+
+So, I just showed you a simple binary which has the button interrupt as well as printing over UART.
+
+So, you can try with different binaries also try with different memories.
+
+OK.You put the code into RAM, SRAM 1,SRAM 2 and try to execute that.
+
+So, try to reproduce this and let me see you in the next lecture.

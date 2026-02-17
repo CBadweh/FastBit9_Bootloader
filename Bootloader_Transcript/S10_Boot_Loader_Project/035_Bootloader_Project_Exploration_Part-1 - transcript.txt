@@ -1,0 +1,159 @@
+Hey, welcome back to the course and hope you have successfully created Keil or eclipse project for our
+
+bootloader development.
+
+So, now let's spend some time to understand this code what the CubeMX software has generated for us.
+
+As I said this is your application layer,
+
+Just open the main.c and here you will see the main function of the project,
+
+and lots of initialization functions are already called from this function OK. In this function
+
+you can see here Init functions they are actually used to configure the
+
+peripherals.
+
+OK. So, how many peripherals were using in this project?
+
+So, GPIOs, 2 UARTs
+
+OK. That is UART2 and UART3 and we are using CRC engine. So, that's why the CubeMX has
+
+inserted 4 Init functions for us.
+
+OK. So, if you just right click over it and if you just click on go to definition,
+
+it will take you to the implementation of that.
+
+So, that is also implemented in the main.c file and here you'll see that they actually use the Init function,
+
+the HAL_Init function in order to initialize the peripheral.
+
+In this case the peripheral GPIO. So, that's why they have used HAL_GPIO_Init.
+
+And here we are enabling the clocks for the various GPIO ports
+
+we are going to use. For example,
+
+So, this is a initialization for the button and this is the GPIO initialization for the LED like that.
+
+OK.
+
+And again let's go back to our main function
+
+and here next is UART2 initialization.
+
+So, if you go to UART2 initialization.
+
+So, this is a small function which initializes the UART2 peripheral, that's it.
+
+So, it just use the Init function of the peripheral like
+
+HAL_UART_Init and it uses all this configurations like the BaudRate will be this much,
+
+and this is a Word length of the UART.
+
+OK.
+
+And other configuration detail.
+
+And similarly, the CubeMX software has also added MX_USART3
+
+UART_Init.
+
+This is for the USART3. Grate, and you can also see here that there is one configuration function System
+
+Clock configuration.
+
+So, this configuration function is used to setup the microcontroller clock. As you know
+
+OK in the STM microcontroller are
+
+you can take any other microcontroller from TI, or NXP, or Atmel. By default
+
+MCU will be using the internal high speed RC oscillator.
+
+OK, as it system clock.
+
+And if you want to change that you can do it by using your code.
+
+So, in this project as I shown you already the CubeMX is not using the HSI clock. It is using
+
+the clock from the main PLL block of the microcontroller. Because, it wants to setup the system clock
+
+as 84 MHz.
+
+So, this software by default configures it for 84 MHz.
+
+But, for our work do we really need 84 MHz of SYSCLK. May not be because, here we are using let's
+
+say UART for the BaudRate of 11 52 00 for such a low BaudRate 84 MHz of SYSCLK
+
+may not be required.
+
+OK. So, you can even change this to HSI
+
+If you are really concerned about the clock.
+
+So, for our work let it be at 84 megahertz.
+
+No big problem.
+
+OK.
+
+So, that's why, it has generated a code here to configure the PLL engine in order to generate 84 MHz
+
+of clock.
+
+So, even you can comment this line no problem.
+
+OK. So, in that case the MCU will be using the HSI clock as the default clock for the system clock.
+
+And here you can see a main HAL_Init.
+
+So, this is to do some early initializations. For example, in this case they have written comments here,
+
+The reset of all peripherals, Initializes the Flash interface and the systick.
+
+And this function is used to initialize the HAl library; it must be the first instruction to be executed
+
+in the main program.
+
+So , whenever you are using you know ST's hardware abstraction layer, then in the main function it's always
+
+better to include this as the first function.
+
+OK.
+
+And another important functionality of this function is actually to setup the systick timer.
+
+OK .So, remember that ARM Cortex M processor core will have a peripheral called systick timer and the ST's
+
+hardware abstraction layer.
+
+That means, some of the peripheral drivers will use the timings of this systick
+
+timer OK.For example, here they are initialising the systick timer of the ARM Cortex M processor.
+
+For example, if I take you into this function here you can see that configure the systic timer to have
+
+interrupt for every one milliseconds.
+
+OK.
+
+So, that means in this project OK, there will be one background interrupt will be generated that is from the
+
+systic timer for every one millisecond.
+
+So,why it is used, It can be used for any purpose.
+
+OK. So, even you can use it in your application for any delay generation or for any other purpose
+
+but by default that will be used by the peripheral drivers like UART driver, or I2C drivers, SPI
+
+driver, in order to implement some of the blocking calls.
+
+So, that's why the peripheral driver layer needs this timings that's why, CubeMX software has added
+
+the systick timer initialization code in order to generate interrupt for every one milliseconds.

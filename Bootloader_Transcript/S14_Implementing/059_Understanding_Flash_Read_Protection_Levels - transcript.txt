@@ -1,0 +1,303 @@
+In this lecture, we will implement a command which is used to read the Flash Read Protection
+
+Level.
+
+All right. So, now our all the remaining commands,
+
+OK
+
+are actually used to deal with flash memory like erasing the flash memory,
+
+a jump into different sectors of the flash memory, write into the flash memory.
+
+All right.
+
+So, even though these commands you can used to write data to even RAM memory.
+
+But, most of our discussion will be now you know revolve around the flash management.
+
+All right.
+
+So, that's why it's better to explore some of the features of the flash memory interface.All
+
+right.
+
+So, this is the flash module organization of this microcontroller, that is STM32F4466
+
+family of microcontrollers. There is a main memory where we store our read only data, code, vector
+
+table everything,
+
+and it has got 8 sectors from sector 0 to sector 7.
+
+And in the first two sectors we store the bootloader and from sector 2 we actually store the user application.
+
+And remember that, by default all these sectors are writable,
+
+erasable and readable.
+
+So,3 important operations you can do.
+
+One is erase, write and read. And the microcontroller also gives a provision in order to secure the
+
+contents of the flash memory.
+
+That means, by default remember that all these sectors are not protected. But, you can make it non erasable,
+
+or non writable, or non readable.
+
+All right. So, these kinds of restriction or configuration or settings you can do in some of the given
+
+registers of the ST, in order to make them protected.
+
+Now, to do that we use something called Option bytes.So, here it is.
+
+So, option bytes are used to manage security level on these flash memories or sectors. Option byte
+
+size is 16 bytes and the option bytes you can configure at this address.
+
+So, now let's explore more about the option bytes.So,
+
+now, let me take you to the option byte section here.
+
+All right. The option bytes are configured by the end user depending on the application requirements.
+
+So, this table shows the organization of these bytes inside the user configuration sector.
+
+Now, remember that this microcontroller gives you 2 addresses this one and this one. In which you can
+
+configure the option bytes in order to manage your different sectors of the flash memory. At this address
+
+only 0 to 15 bits are usable rest are reserved.
+
+All right.
+
+And this address you can use to impose some write protection bits for sector 0 to 7.
+
+So, that will explore later.
+
+No problem.
+
+All right. So, now let's first explore this RDP. So,now for that we have to explore this address.
+
+All right. So, now let's go down here it is.
+
+So, option bytes at this address and as I said Only 18 to 15 bits are usable.
+
+And here this field is called as RDP( Read protection option byte).
+
+The read protection is used to protect the software code stored in the flash memory. So, that protection
+
+can be in 3 levels. One is level1, level2, and level0.
+
+If the content of these bits in this address is AA, then it's a level0 protection. That means no protection.
+
+OK. So, level 0 production means no protection on the software code you have stored in the flash memory.
+
+Now, if it is CC, then it's a level 2 protection.
+
+And if it is any other value than AA or CC then it's a level1 protection. And when the read protection
+
+level is set to level0 by writing AA into the read protection option byte, all read/write operations from/to
+
+the flash memory are possible in all boot configurations such as Flash user boot, debug or boot from RAM.
+
+So, that means there are no restrictions
+
+if it is level 0.So, now if it is level 1 read production is enabled.
+
+So, now the read protection level 1 is activated by writing any value( except for AA and CC) OK into the RDP
+
+option.
+
+byte.
+
+So, now what happens when we enable the level1, read protection here it is. No access
+
+read, erase and program to flash memory can be performed.
+
+So, you cannot perform a read,
+
+erase, and program operation. While the debug feature is connected or while booting from RAM or system
+
+memory bootloader.
+
+So, the bus error is generated in case of read request. So, simply if I want to say it is very simple
+
+when in level 1, you cannot use your debugger to read, or erase,or program
+
+your flash memory.
+
+So, suppose a think of a situation that you have given a software code to your customer.
+
+A customer can insert a debugger into that product and he can read the code,
+
+What you have stored that. Right?
+
+If you don't want your customer to do that then you can put the RDP level to level 1. So, your customer
+
+can never able to access those software code from the debugger.
+
+All right, So, now when booting from flash memory, accesses that is read ,erase, program to flash memory
+
+from user code are allowed.
+
+That's fine. Because, whenever you boot from the flash memory that happens internally, right?
+
+I mean you can read from the flash, you can write, and you can erase.
+
+No problem.
+
+But, you cannot connect the debugger and read some data from the flash memory, or erase it, or program it
+
+with something else.
+
+OK.
+
+And also there is one important point here it is.
+
+The Mass erase is performed when
+
+level 1 is active and level 0 is requested.
+
+So,whenever your customer wants to get into level 0 the whole code will be erased OK, when you want to
+
+go from level 1 to level 0.
+
+So, that's the protection level design is given by the ST.
+
+So, this design may not be the same if you go for some other vendor like TI. There it may be different
+
+so you have to explore that.
+
+Now, level 2. In level 2,
+
+The read protection level 2 is activated by writing CC to the option byte RDP option byte.
+
+So, when the level 2 is set, all protections provided by level 1 are active and some more protections are
+
+given.
+
+That is booting from RAM or system memory that is booting from the ST's bootloader. Right? Invoking
+
+that ST's bootloader is no more allowed and you cannot use JTAG, or single-wire viewer, or ETM,
+
+or boundary scan feature.So, complete protections
+
+no tweaking is allowed.
+
+User option
+
+bytes can no longer be changed.
+
+So, once you are in level2 user option bytes can never be changed.
+
+When booting from flash memory that's the default booting, isn't it?
+
+Accesses that is read, erase, and program to flash memory from user code are of course allowed. And remember
+
+one thing,
+
+It is very very important.
+
+Memory read protection level 2 is an irreversible operation.
+
+When level 2 is activated, the level of protection cannot be decreased to level 0 or level 1.
+
+So, this is an irreversible operation so that's why I don't want you to change the RDP option by to
+
+level 2.
+
+So ,if you do that you can never able to do all these activities.
+
+All right.
+
+And it is irreversible.
+
+So, this can only be done during protection of your product.
+
+All right.
+
+So, where you are giving out some product your customer,
+
+and if you want to impose all these restrictions then only you can make it as level 2 and you can give
+
+it to the customer. So, that customer has no chance of tweaking inside the code or changing or erasing
+
+that code.
+
+All right. In your development phase don't change the RDP status to level 2.
+
+Otherwise, you will trap into problems.
+
+Okay. Great.
+
+So now, what's our task?
+
+Our task is now to read the flash read protection level.
+
+That is RDP level.
+
+So, in order to read that as I said we have to read this address. In this address we have to read
+
+8 to 15 bits.
+
+So, that's a read protection option byte.
+
+So, if it is AA then no protection, if it is CC then it is level 2 like that.
+
+Okay.
+
+And by default it will be AA. Let's write a small code to do this.
+
+Now, let me go back to my project and
+
+All right.
+
+So, this is my bootloader project and at the end I have added the code for that.
+
+Here it is.
+
+All right.
+
+So, let me just maximize this get_flash_rdp_ level.
+
+So, I just added this function to main.c and I have used to 2 implementations here.
+
+So, let me first explain this implementation.
+
+So,it's very simple.
+
+First, I am here declaring and initializing a 32 bit unsigned, 32 bit pointer variable and I initialized
+
+that to this address, that is this address.
+
+All right.And after that, I'm just reading it's contents
+
+and I'm interested in the bits 8 to 15. isn't it?
+
+Right?
+
+That means the second byte.
+
+So, that's why I just shifted by 8 times.
+
+Now, then I'm returning that rdp_status. Now, the same thing also can be done using the APIs provided by
+
+the flash driver.
+
+Now, that I will explain you later.
+
+So, now let's test this.
+
+So, now here is a handle function for that.
+
+This is a handle function for the get_rdp and here,
+
+I'm calling this function get_flash_rdp_level.
+
+Then,I'm sending that as a reply back to the host.
+
+Great.
+
+So, now let's test this.

@@ -1,0 +1,111 @@
+Hey, welcome back to the lecture.
+
+And in this lecture, let's talk about the Host and bootloader communication in our custom bootloader design.
+
+OK.
+
+So, Host in our case is PC or it can be another micro-controller, no problem.
+
+OK.
+
+So, but we will use PC as our host and the target is of course the microcontroller which is running the
+
+bootloader.
+
+And this is how the host and bootloader communicate with each other.
+
+So, as soon as you reset OK your micro-controller,
+
+let's say you reset the microcontroller here.
+
+So, the microcontroller will now do lots of initializations like clock initialization, UART initialization
+
+and it hangs
+
+at one point waiting for the data.
+
+OK
+
+from the host, or waiting for the command packet from the host on UART.
+
+So, it will just hang on
+
+UART reading function.
+
+So, than OK, when the host sends the command packet.
+
+OK. So, we will see what is the format of the command packet later.
+
+So, once host sends the command packet the bootloader receives that packet OK, and decodes it. And it first checks
+
+for the byte integrity.
+
+That means, the CRC of the received packet is verified.
+
+We actually use 32bit CRC engine here.
+
+In order to calculate the CRC and verify the CRC of the transmitted bytes here OK.So, that will see
+
+during our implementation.
+
+So, if the CRC is good it will send ACK plus one byte length field,
+
+and if the CRC fails then it sends NACK.
+
+OK. So, here 2 bytes are actually sent. The first byte is as I said it is NACK or ACK.
+
+And the second byte is,
+
+So, if the CRC verification is success, then the second byte will be how many bytes the bootloader is going
+
+to send in its next reply OK.
+
+That is replied reply to the command.
+
+So, the second field actually contains how many bytes of data,
+
+the bootloader is going to send next.
+
+Then it executes the command and then it sends the reply back to the host.
+
+For example, let's say host sends the command
+
+Get chip ID.
+
+OK.That is get chip identification number.
+
+So, if the CRC is verified then it sends the ACK OK. And then, in the second byte it will include how many
+
+bytes it is going to send next.
+
+OK.So, then it execute some instructions to read the chip ID from the microcontroller,
+
+and then it you know sends the reply.
+
+So, let's say in this case chip ID will be of 2 bytes.
+
+It sends 2 bytes here.
+
+So, how many bytes it is going to send here is already in form to the host.
+
+OK in this field.
+
+So, that's how the host and bootloader communicates with each other,
+
+and this is common for all the commands which we have used in this course.
+
+Fine, and this is the design followed in this course and if you think you have any better design of course,
+
+you can try that implementation by changing the code.
+
+No problem with that.
+
+OK. So, this is the host bootloader communication method,
+
+I followed for this bootloader implementation.
+
+All right. So, now in the next lecture we have to understand what exactly is a command packet, which is
+
+going to come from the host.
+
+I will see you in the next lecture.

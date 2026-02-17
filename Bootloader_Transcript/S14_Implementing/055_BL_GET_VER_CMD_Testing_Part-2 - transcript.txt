@@ -1,0 +1,149 @@
+So, in the previous 2 lectures you have installed Python as well as pyserial module.
+
+So, I hope you have done that,
+
+and now let's execute the host application.
+
+All right. So, the host application is actually in this path source code host Python. Isn't it?
+
+So, let's get into this directory.
+
+OK. So, I will just open my command prompt, so you can also open your
+
+command prompt and here let me just get into first this directory.
+
+OK.
+
+So, I'll just copy this and I will first go to E and CD.
+
+Let me paste that path.
+
+Great.
+
+And now, what have to do is. You have to type python,
+
+that's a python script,
+
+and give the name that is STM32_Programmer_V1.py.
+
+All right.
+
+So, this is a same command across all the platforms.
+
+So, just press enter and now it ask you to enter the port name of your device.
+
+That means, you have to enter the virtual COM port name of your target, that is Nucleo board or discovery
+
+board whatever OK.
+
+So, if you don't know which port it is,
+
+then just press enter and it will list all the available ports.
+
+OK. So, now since I have not connected my board it is not showing anything.So,
+
+now what I do is, let me connect my board.
+
+OK.
+
+So, I just connected my board
+
+and let me again rerun the script, and let me just press the enter once again, and here we can see that it is
+
+saying that these are the available ports on my PC.
+
+OK.
+
+So, now let me just run once again and this time I'll give you COM3. And we can also get this information
+
+from Device Manager in Windows. And if you're running this on Mac then it will show you the device file
+
+associated with that board.
+
+OK. So, you have to enter that.
+
+And if you are running this on Ubuntu, then it will show you dev, tty,acm0 or acm1 etc..
+
+So, you have to enter that.
+
+So, just enter what exactly it is showing between these single quotes.
+
+OK.
+
+Now, let me enter COM3 here and let me press enter.
+
+And this is the menu launched by the script.
+
+So, it is saying that it's a STM32F4 bootloader version1 and it is asking you which bootloader
+
+command do you want to send.
+
+Remember that, before executing any command
+
+make sure that the board is in the bootloader mode.
+
+OK. So, that means your bootloader code must be running on the target hardware.
+
+So, and it is showing all the available commands and its associated number so for bootloader get version
+
+command,
+
+I have to enter
+
+command code1 in order to execute that.
+
+OK. So, now let me just type one here and let's see what happens.
+
+And the host has sent that command to the bootloader but it couldn't able to read any reply.
+
+That's because, the board is not in the bootloader mode.
+
+Now, let me flash the bootloader code onto the target.
+
+OK. So, now let me rebuild the project once again.
+
+All right. So, now let me download the code onto the target and now let me reset the board, but remember
+
+that while resetting the board make sure that you press the user button.So, that you allow the board
+
+to go into the bootloader mode.
+
+OK. Now, I'm pressing the user button and then I am resetting the board.
+
+Now, the bootloader code must be running on my target.
+
+And now let me go to this menu and press any key to continue,
+
+let me press any key.
+
+And now, let me execute again the BL_GET_VER command that we just implemented.
+
+Let me press 1, and let's hit enter and here we can see that the bootloader has returned
+
+0x10.
+
+Right?
+
+Great.
+
+Now, let me change something in the code
+
+now. Let me go to main.h and here is a bootloader version. Isn't it?
+
+So, let me make it 20. And let me just test, let me compile.
+
+All right. So, now let's download the code.
+
+Let me reset the board.
+
+And let's press any key to continue,
+
+and let's again execute the BL_GET_VER command type 1 and press enter
+
+and here we can see the bootloader version received is 0x20.
+
+Great.
+
+So, try this at your desk and let me know if you face any issues OK.
+
+And in the next lecture, let's see how we can debug the bootloader project. I will see you in the next lecture.
