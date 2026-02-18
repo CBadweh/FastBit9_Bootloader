@@ -531,24 +531,18 @@ uint8_t verify_address(uint32_t go_address)
 // Execute flash erase (sector or mass erase)
 uint8_t execute_flash_erase(uint8_t sector_number, uint8_t number_of_sector)
 {
-    // F401RE has 8 sectors (0-7). Reject anything else that isn't mass-erase (0xFF).
-    if(sector_number > 7 && sector_number != 0xFF)
-    {
-        return FLASH_HAL_ERROR;
-    }
-
     FLASH_EraseInitTypeDef flashErase_handle;
     uint32_t sectorError;
     HAL_StatusTypeDef status;
 
-    if(sector_number == 0xFF)
+    if(sector_number == 0xff)
     {
         // Mass erase (all sectors)
         flashErase_handle.TypeErase = FLASH_TYPEERASE_MASSERASE;
     }
     else
     {
-        // Sector erase — clamp count so we never go past sector 7
+        // Sector erase
         uint8_t remaining_sector = 8 - sector_number;  // F401RE has 8 sectors (0-7)
         if(number_of_sector > remaining_sector)
         {

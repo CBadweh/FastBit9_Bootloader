@@ -1,0 +1,10 @@
+21:04:25 **** Incremental Build of configuration Debug for project Badweh_Bootloader_Milestone123 ****
+make -j16 all 
+arm-none-eabi-size  Badweh_Bootloader_Milestone123.elf 
+   text	   data	    bss	    dec	    hex	filename
+  11900	     92	   2052	  14044	   36dc	Badweh_Bootloader_Milestone123.elf
+Finished building: default.size.stdout
+ 
+
+21:04:25 Build Finished. 0 errors, 0 warnings. (took 267ms)
+
