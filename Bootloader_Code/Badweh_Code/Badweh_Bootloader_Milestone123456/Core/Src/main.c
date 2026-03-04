@@ -58,6 +58,7 @@ uint8_t bl_rx_buffer[BL_RX_LEN];
 uint8_t supported_commands[] = {
     BL_GET_VER,
     BL_GET_HELP,
+    BL_GET_CID,
     BL_FLASH_ERASE
 };
 
@@ -388,6 +389,9 @@ void bootloader_uart_read_data(void)
             case BL_GET_HELP:
                 bootloader_handle_gethelp_cmd(bl_rx_buffer);
                 break;
+            case BL_GET_CID:
+                bootloader_handle_getcid_cmd(bl_rx_buffer);
+                break;
             case BL_FLASH_ERASE:
                 bootloader_handle_flash_erase_cmd(bl_rx_buffer);
                 break;
@@ -585,7 +589,45 @@ void bootloader_handle_flash_erase_cmd(uint8_t *pBuffer)
 }
 
 // ============================================================================
-// 12. Handle BL_GET_HELP Command (Command 0x52)
+// 12. Get MCU Chip ID
+// ============================================================================
+uint16_t get_mcu_chip_id(void)
+{
+    // Read DBGMCU IDCODE register, mask bits 0-11 (device identifier)
+    // STM32F401RE returns 0x433, STM32F446RE returns 0x421
+    uint16_t cid;
+    cid = (uint16_t)(DBGMCU->IDCODE) & 0x0FFF;
+    return cid;
+}
+
+// ============================================================================
+// 13. Handle BL_GET_CID Command (Command 0x53)
+// ============================================================================
+void bootloader_handle_getcid_cmd(uint8_t *pBuffer)
+{
+    uint16_t bl_cid_num = 0;
+    printmsg("BL_DEBUG_MSG: bootloader_handle_getcid_cmd\r\n");
+
+    uint32_t command_packet_len = bl_rx_buffer[0] + 1;
+    uint32_t host_crc = *((uint32_t *)(bl_rx_buffer + command_packet_len - 4));
+
+    if (bootloader_verify_crc(&bl_rx_buffer[0], command_packet_len - 4, host_crc) == VERIFY_CRC_SUCCESS)
+    {
+        printmsg("BL_DEBUG_MSG: CRC verification success\r\n");
+        bootloader_send_ack(pBuffer[1], 2);
+        bl_cid_num = get_mcu_chip_id();
+        printmsg("BL_DEBUG_MSG: MCU id : %d %#x\r\n", bl_cid_num, bl_cid_num);
+        bootloader_uart_write_data((uint8_t *)&bl_cid_num, 2);
+    }
+    else
+    {
+        printmsg("BL_DEBUG_MSG: CRC verification fail\r\n");
+        bootloader_send_nack();
+    }
+}
+
+// ============================================================================
+// 14. Handle BL_GET_HELP Command (Command 0x52)
 // ============================================================================
 void bootloader_handle_gethelp_cmd(uint8_t *pBuffer)
 {

@@ -78,6 +78,10 @@ uint8_t execute_flash_erase(uint8_t sector_number, uint8_t number_of_sector);
 // BL_GET_HELP
 void bootloader_handle_gethelp_cmd(uint8_t *pBuffer);
 
+// BL_GET_CID
+void bootloader_handle_getcid_cmd(uint8_t *pBuffer);
+uint16_t get_mcu_chip_id(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -117,6 +121,7 @@ void bootloader_handle_gethelp_cmd(uint8_t *pBuffer);
 // Command codes
 #define BL_GET_VER          0x51
 #define BL_GET_HELP         0x52
+#define BL_GET_CID          0x53
 #define BL_FLASH_ERASE      0x56
 
 // STM32F401RE: 6 sectors (0-5), not 8 like F446
