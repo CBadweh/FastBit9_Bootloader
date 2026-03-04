@@ -812,3 +812,8 @@ Bootloader_Code/Badweh_Code/Badweh_Bootloader_Milestone123456/Debug/Drivers/STM3
 Bootloader_Code/Badweh_Code/Badweh_Bootloader_Milestone123456/Debug/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
 Bootloader_Code/Badweh_Code/Badweh_Bootloader_Milestone123456/Debug/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o
 Bootloader_Code/Badweh_Code/Badweh_Bootloader_Milestone123456/Debug/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
+Bootloader_Code/Badweh_Code/Badweh_Bootloader_Milestone123456/Debug/Core/Src/main.cyclo
+Bootloader_Code/Badweh_Code/Badweh_Bootloader_Milestone123456/Debug/Core/Src/main.o
+Bootloader_Code/Badweh_Code/Badweh_Bootloader_Milestone123456/Debug/Core/Src/main.su
+Bootloader_Code/Badweh_Code/Badweh_Bootloader_Milestone123456/Debug/Core/Src/stm32f4xx_hal_msp.o
+Bootloader_Code/Badweh_Code/Badweh_Bootloader_Milestone123456/Debug/Core/Src/stm32f4xx_it.o

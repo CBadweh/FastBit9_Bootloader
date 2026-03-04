@@ -55,6 +55,12 @@ UART_HandleTypeDef huart6;
 
 uint8_t bl_rx_buffer[BL_RX_LEN];
 
+uint8_t supported_commands[] = {
+    BL_GET_VER,
+    BL_GET_HELP,
+    BL_FLASH_ERASE
+};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -379,6 +385,9 @@ void bootloader_uart_read_data(void)
             case BL_GET_VER:
                 bootloader_handle_getver_cmd(bl_rx_buffer);
                 break;
+            case BL_GET_HELP:
+                bootloader_handle_gethelp_cmd(bl_rx_buffer);
+                break;
             case BL_FLASH_ERASE:
                 bootloader_handle_flash_erase_cmd(bl_rx_buffer);
                 break;
@@ -567,6 +576,29 @@ void bootloader_handle_flash_erase_cmd(uint8_t *pBuffer)
 
         printmsg("BL_DEBUG_MSG: Flash erase status: %#x\r\n", erase_status);
         bootloader_uart_write_data(&erase_status, 1);
+    }
+    else
+    {
+        printmsg("BL_DEBUG_MSG: CRC verification fail\r\n");
+        bootloader_send_nack();
+    }
+}
+
+// ============================================================================
+// 12. Handle BL_GET_HELP Command (Command 0x52)
+// ============================================================================
+void bootloader_handle_gethelp_cmd(uint8_t *pBuffer)
+{
+    printmsg("BL_DEBUG_MSG: bootloader_handle_gethelp_cmd\r\n");
+
+    uint32_t command_packet_len = bl_rx_buffer[0] + 1;
+    uint32_t host_crc = *((uint32_t *)(bl_rx_buffer + command_packet_len - 4));
+
+    if (bootloader_verify_crc(&bl_rx_buffer[0], command_packet_len - 4, host_crc) == VERIFY_CRC_SUCCESS)
+    {
+        printmsg("BL_DEBUG_MSG: CRC verification success\r\n");
+        bootloader_send_ack(pBuffer[1], sizeof(supported_commands));
+        bootloader_uart_write_data(supported_commands, sizeof(supported_commands));
     }
     else
     {
