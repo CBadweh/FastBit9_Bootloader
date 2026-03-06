@@ -82,6 +82,10 @@ void bootloader_handle_gethelp_cmd(uint8_t *pBuffer);
 void bootloader_handle_getcid_cmd(uint8_t *pBuffer);
 uint16_t get_mcu_chip_id(void);
 
+// BL_GET_RDP_STATUS
+void bootloader_handle_getrdp_cmd(uint8_t *pBuffer);
+uint8_t get_flash_rdp_level(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -122,6 +126,7 @@ uint16_t get_mcu_chip_id(void);
 #define BL_GET_VER          0x51
 #define BL_GET_HELP         0x52
 #define BL_GET_CID          0x53
+#define BL_GET_RDP_STATUS   0x54
 #define BL_FLASH_ERASE      0x56
 
 // STM32F401RE: 6 sectors (0-5), not 8 like F446

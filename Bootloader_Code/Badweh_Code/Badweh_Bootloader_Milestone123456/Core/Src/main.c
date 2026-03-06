@@ -59,6 +59,7 @@ uint8_t supported_commands[] = {
     BL_GET_VER,
     BL_GET_HELP,
     BL_GET_CID,
+    BL_GET_RDP_STATUS,
     BL_FLASH_ERASE
 };
 
@@ -392,6 +393,9 @@ void bootloader_uart_read_data(void)
             case BL_GET_CID:
                 bootloader_handle_getcid_cmd(bl_rx_buffer);
                 break;
+            case BL_GET_RDP_STATUS:
+                bootloader_handle_getrdp_cmd(bl_rx_buffer);
+                break;
             case BL_FLASH_ERASE:
                 bootloader_handle_flash_erase_cmd(bl_rx_buffer);
                 break;
@@ -627,7 +631,44 @@ void bootloader_handle_getcid_cmd(uint8_t *pBuffer)
 }
 
 // ============================================================================
-// 14. Handle BL_GET_HELP Command (Command 0x52)
+// 14. Get Flash RDP Level
+// ============================================================================
+uint8_t get_flash_rdp_level(void)
+{
+    // Read option bytes from flash storage at 0x1FFFC000, extract bits 8-15 (RDP byte)
+    // 0xAA = Level 0 (no protection), 0xCC = Level 2 (irreversible), else Level 1
+    volatile uint32_t *pOBaddr = (uint32_t *)0x1FFFC000;
+    return (uint8_t)(*pOBaddr >> 8);
+}
+
+// ============================================================================
+// 15. Handle BL_GET_RDP_STATUS Command (Command 0x54)
+// ============================================================================
+void bootloader_handle_getrdp_cmd(uint8_t *pBuffer)
+{
+    uint8_t rdp_level = 0x00;
+    printmsg("BL_DEBUG_MSG: bootloader_handle_getrdp_cmd\r\n");
+
+    uint32_t command_packet_len = bl_rx_buffer[0] + 1;
+    uint32_t host_crc = *((uint32_t *)(bl_rx_buffer + command_packet_len - 4));
+
+    if (bootloader_verify_crc(&bl_rx_buffer[0], command_packet_len - 4, host_crc) == VERIFY_CRC_SUCCESS)
+    {
+        printmsg("BL_DEBUG_MSG: CRC verification success\r\n");
+        bootloader_send_ack(pBuffer[1], 1);
+        rdp_level = get_flash_rdp_level();
+        printmsg("BL_DEBUG_MSG: RDP level: %d %#x\r\n", rdp_level, rdp_level);
+        bootloader_uart_write_data(&rdp_level, 1);
+    }
+    else
+    {
+        printmsg("BL_DEBUG_MSG: CRC verification fail\r\n");
+        bootloader_send_nack();
+    }
+}
+
+// ============================================================================
+// 16. Handle BL_GET_HELP Command (Command 0x52)
 // ============================================================================
 void bootloader_handle_gethelp_cmd(uint8_t *pBuffer)
 {

@@ -87,6 +87,17 @@ After jumping, the processor would still look for interrupt vectors at `0x080000
 
 Without this, the user app's button EXTI interrupt calls the bootloader's handler instead.
 
+### UART Channels
+
+Two separate physical UARTs serve different purposes:
+
+| Channel | Peripheral | Pins | Destination | Used by |
+|---------|-----------|------|-------------|---------|
+| Command UART | USART2 | PA2/PA3 | ST-Link → Virtual COM Port | Python host script — sends commands, receives ACK + data |
+| Debug UART | USART6 | PC6/PC7 | External USB-to-UART | PuTTY — receives `printmsg()` debug text only |
+
+`HAL_UART_Transmit(C_UART, ...)` → Python. `printmsg(...)` → PuTTY. They are independent.
+
 ### Command Protocol (Bootloader Mode)
 
 All UART commands use USART2 (PA2/PA3, Virtual COM Port via ST-Link):
@@ -100,11 +111,16 @@ Bytes N-3..N:  CRC32 (4 bytes, little-endian)
 
 Response: `0xA5 <follow_len> <data>` (ACK) or `0x7F` (NACK)
 
-| Code | Command | Status |
-|------|---------|--------|
-| 0x51 | `BL_GET_VER` — returns version `0x10` | Implemented |
-| 0x56 | `BL_FLASH_ERASE` — sector or mass erase | Implemented |
-| 0x52–0x55, 0x57–0x58 | Other commands | Stubbed |
+| Code | Command | Status | Tested |
+|------|---------|--------|--------|
+| 0x51 | `BL_GET_VER` — returns version `0x10` | Implemented | ✓ |
+| 0x52 | `BL_GET_HELP` — returns `supported_commands[]` array | Implemented | ✓ |
+| 0x53 | `BL_GET_CID` — returns chip ID (`0x0433` on F401RE) | Implemented | ✓ |
+| 0x56 | `BL_FLASH_ERASE` — sector or mass erase | Implemented | ✓ |
+| 0x54 | `BL_GET_RDP_STATUS` | Not implemented | — |
+| 0x55 | `BL_GO_TO_ADDR` | Not implemented | — |
+| 0x57 | `BL_MEM_WRITE` | Not implemented | — |
+| 0x58 | `BL_READ_SECTOR_P_STATUS` | Not implemented | — |
 
 ---
 
