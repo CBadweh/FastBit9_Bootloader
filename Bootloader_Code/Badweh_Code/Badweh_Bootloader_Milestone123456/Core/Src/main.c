@@ -61,7 +61,8 @@ uint8_t supported_commands[] = {
     BL_GET_CID,
     BL_GET_RDP_STATUS,
     BL_GO_TO_ADDR,
-    BL_FLASH_ERASE
+    BL_FLASH_ERASE,
+    BL_MEM_WRITE
 };
 
 /* USER CODE END PV */
@@ -402,6 +403,9 @@ void bootloader_uart_read_data(void)
                 break;
             case BL_FLASH_ERASE:
                 bootloader_handle_flash_erase_cmd(bl_rx_buffer);
+                break;
+            case BL_MEM_WRITE:
+                bootloader_handle_mem_write_cmd(bl_rx_buffer);
                 break;
             default:
                 printmsg("BL_DEBUG_MSG: Invalid command code received: 0x%x\r\n", bl_rx_buffer[1]);
@@ -760,6 +764,70 @@ void bootloader_handle_go_cmd(uint8_t *pBuffer)
         printmsg("BL_DEBUG_MSG: CRC verification fail\r\n");
         bootloader_send_nack();
     }
+}
+
+// ============================================================================
+// 19. Handle BL_MEM_WRITE Command (Command 0x57) — Lessons 067/068
+// ============================================================================
+void bootloader_handle_mem_write_cmd(uint8_t *pBuffer)
+{
+    uint8_t write_status = 0x00;
+    uint8_t payload_len = pBuffer[6];
+    uint32_t mem_address = *((uint32_t *)(&pBuffer[2]));
+
+    printmsg("BL_DEBUG_MSG: bootloader_handle_mem_write_cmd\r\n");
+
+    uint32_t command_packet_len = bl_rx_buffer[0] + 1;
+    uint32_t host_crc = *((uint32_t *)(bl_rx_buffer + command_packet_len - 4));
+
+    if (!bootloader_verify_crc(&bl_rx_buffer[0], command_packet_len - 4, host_crc))
+    {
+        printmsg("BL_DEBUG_MSG: checksum success\r\n");
+        bootloader_send_ack(pBuffer[1], 1);
+
+        printmsg("BL_DEBUG_MSG: mem write address: %#x\r\n", mem_address);
+
+        if (verify_address(mem_address) == ADDR_VALID)
+        {
+            printmsg("BL_DEBUG_MSG: valid mem write address\r\n");
+
+            HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+            write_status = execute_mem_write(&pBuffer[7], mem_address, payload_len);
+            HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+
+            bootloader_uart_write_data(&write_status, 1);
+        }
+        else
+        {
+            printmsg("BL_DEBUG_MSG: invalid mem write address\r\n");
+            write_status = ADDR_INVALID;
+            bootloader_uart_write_data(&write_status, 1);
+        }
+    }
+    else
+    {
+        printmsg("BL_DEBUG_MSG: checksum fail\r\n");
+        bootloader_send_nack();
+    }
+}
+
+// ============================================================================
+// 20. Execute Memory Write
+// ============================================================================
+uint8_t execute_mem_write(uint8_t *pBuffer, uint32_t mem_address, uint32_t len)
+{
+    uint8_t status = HAL_OK;
+
+    HAL_FLASH_Unlock();
+
+    for (uint32_t i = 0; i < len; i++)
+    {
+        status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, mem_address + i, pBuffer[i]);
+    }
+
+    HAL_FLASH_Lock();
+
+    return status;
 }
 
 /* USER CODE END 4 */

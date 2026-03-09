@@ -90,6 +90,10 @@ uint8_t get_flash_rdp_level(void);
 void bootloader_handle_go_cmd(uint8_t *pBuffer);
 uint8_t verify_address(uint32_t go_address);
 
+// BL_MEM_WRITE
+void bootloader_handle_mem_write_cmd(uint8_t *pBuffer);
+uint8_t execute_mem_write(uint8_t *pBuffer, uint32_t mem_address, uint32_t len);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -133,6 +137,7 @@ uint8_t verify_address(uint32_t go_address);
 #define BL_GET_RDP_STATUS   0x54
 #define BL_GO_TO_ADDR       0x55
 #define BL_FLASH_ERASE      0x56
+#define BL_MEM_WRITE        0x57
 
 // STM32F401RE: 6 sectors (0-5), not 8 like F446
 #define STM32F401RE_NUM_SECTORS  6

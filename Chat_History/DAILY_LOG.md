@@ -129,3 +129,24 @@
 		Commands:
 			command code: 7
 			Enter sector number: 0xff
+
+
+
+## BL_MEM_WRITE
+
+Needs to save the .bin in the same folder as the python script
+
+Demo: 
+    <!-- move the .bin to where the python script is -->
+    move the file
+    <!-- Erase sector 2 -->
+    cmd: 7
+    cmd: 2
+    cmd: 2
+    <!-- Write command -->
+    cmd: 8
+    cmd: 0x08008000
+
+    <!-- Trigger the binary with go to command -->
+    cmd: 5
+    cmd: 0x080088D0
