@@ -94,6 +94,13 @@ uint8_t verify_address(uint32_t go_address);
 void bootloader_handle_mem_write_cmd(uint8_t *pBuffer);
 uint8_t execute_mem_write(uint8_t *pBuffer, uint32_t mem_address, uint32_t len);
 
+// BL_EN_RW_PROTECT / BL_DIS_R_W_PROTECT / BL_READ_SECTOR_P_STATUS
+void bootloader_handle_en_rw_protect(uint8_t *pBuffer);
+void bootloader_handle_dis_rw_protect(uint8_t *pBuffer);
+void bootloader_handle_read_sector_protection_status(uint8_t *pBuffer);
+uint8_t configure_flash_sector_rw_protection(uint8_t sector_details, uint8_t protection_mode, uint8_t disable);
+uint16_t read_OB_rw_protection_status(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -138,6 +145,9 @@ uint8_t execute_mem_write(uint8_t *pBuffer, uint32_t mem_address, uint32_t len);
 #define BL_GO_TO_ADDR       0x55
 #define BL_FLASH_ERASE      0x56
 #define BL_MEM_WRITE        0x57
+#define BL_EN_RW_PROTECT        0x58
+#define BL_READ_SECTOR_P_STATUS 0x5A
+#define BL_DIS_R_W_PROTECT      0x5C
 
 // STM32F401RE: 6 sectors (0-5), not 8 like F446
 #define STM32F401RE_NUM_SECTORS  6

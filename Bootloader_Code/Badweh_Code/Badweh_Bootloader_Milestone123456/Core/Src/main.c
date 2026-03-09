@@ -62,7 +62,10 @@ uint8_t supported_commands[] = {
     BL_GET_RDP_STATUS,
     BL_GO_TO_ADDR,
     BL_FLASH_ERASE,
-    BL_MEM_WRITE
+    BL_MEM_WRITE,
+    BL_EN_RW_PROTECT,
+    BL_READ_SECTOR_P_STATUS,
+    BL_DIS_R_W_PROTECT
 };
 
 /* USER CODE END PV */
@@ -406,6 +409,15 @@ void bootloader_uart_read_data(void)
                 break;
             case BL_MEM_WRITE:
                 bootloader_handle_mem_write_cmd(bl_rx_buffer);
+                break;
+            case BL_EN_RW_PROTECT:
+                bootloader_handle_en_rw_protect(bl_rx_buffer);
+                break;
+            case BL_READ_SECTOR_P_STATUS:
+                bootloader_handle_read_sector_protection_status(bl_rx_buffer);
+                break;
+            case BL_DIS_R_W_PROTECT:
+                bootloader_handle_dis_rw_protect(bl_rx_buffer);
                 break;
             default:
                 printmsg("BL_DEBUG_MSG: Invalid command code received: 0x%x\r\n", bl_rx_buffer[1]);
@@ -828,6 +840,162 @@ uint8_t execute_mem_write(uint8_t *pBuffer, uint32_t mem_address, uint32_t len)
     HAL_FLASH_Lock();
 
     return status;
+}
+
+// ============================================================================
+// 21. Handle BL_EN_RW_PROTECT Command (Command 0x58) — Lesson 070
+// ============================================================================
+void bootloader_handle_en_rw_protect(uint8_t *pBuffer)
+{
+    uint8_t status = 0x00;
+    printmsg("BL_DEBUG_MSG: bootloader_handle_en_rw_protect\r\n");
+
+    uint32_t command_packet_len = bl_rx_buffer[0] + 1;
+    uint32_t host_crc = *((uint32_t *)(bl_rx_buffer + command_packet_len - 4));
+
+    if (!bootloader_verify_crc(&bl_rx_buffer[0], command_packet_len - 4, host_crc))
+    {
+        printmsg("BL_DEBUG_MSG: checksum success\r\n");
+        bootloader_send_ack(pBuffer[1], 1);
+
+        // pBuffer[2] = sector_details (bitmask), pBuffer[3] = protection_mode (1=WP, 2=PCROP)
+        status = configure_flash_sector_rw_protection(pBuffer[2], pBuffer[3], 0);
+
+        printmsg("BL_DEBUG_MSG: en_rw_protect status: %#x\r\n", status);
+        bootloader_uart_write_data(&status, 1);
+    }
+    else
+    {
+        printmsg("BL_DEBUG_MSG: checksum fail\r\n");
+        bootloader_send_nack();
+    }
+}
+
+// ============================================================================
+// 22. Handle BL_DIS_R_W_PROTECT Command (Command 0x5C) — Lesson 070
+// ============================================================================
+void bootloader_handle_dis_rw_protect(uint8_t *pBuffer)
+{
+    uint8_t status = 0x00;
+    printmsg("BL_DEBUG_MSG: bootloader_handle_dis_rw_protect\r\n");
+
+    uint32_t command_packet_len = bl_rx_buffer[0] + 1;
+    uint32_t host_crc = *((uint32_t *)(bl_rx_buffer + command_packet_len - 4));
+
+    if (!bootloader_verify_crc(&bl_rx_buffer[0], command_packet_len - 4, host_crc))
+    {
+        printmsg("BL_DEBUG_MSG: checksum success\r\n");
+        bootloader_send_ack(pBuffer[1], 1);
+
+        status = configure_flash_sector_rw_protection(0, 0, 1);
+
+        printmsg("BL_DEBUG_MSG: dis_rw_protect status: %#x\r\n", status);
+        bootloader_uart_write_data(&status, 1);
+    }
+    else
+    {
+        printmsg("BL_DEBUG_MSG: checksum fail\r\n");
+        bootloader_send_nack();
+    }
+}
+
+// ============================================================================
+// 23. Handle BL_READ_SECTOR_P_STATUS Command (Command 0x5A) — Lesson 069
+// ============================================================================
+void bootloader_handle_read_sector_protection_status(uint8_t *pBuffer)
+{
+    uint16_t status;
+    printmsg("BL_DEBUG_MSG: bootloader_handle_read_sector_protection_status\r\n");
+
+    uint32_t command_packet_len = bl_rx_buffer[0] + 1;
+    uint32_t host_crc = *((uint32_t *)(bl_rx_buffer + command_packet_len - 4));
+
+    if (!bootloader_verify_crc(&bl_rx_buffer[0], command_packet_len - 4, host_crc))
+    {
+        printmsg("BL_DEBUG_MSG: checksum success\r\n");
+        bootloader_send_ack(pBuffer[1], 2);
+
+        status = read_OB_rw_protection_status();
+        printmsg("BL_DEBUG_MSG: nWRP status: %#x\r\n", status);
+        bootloader_uart_write_data((uint8_t *)&status, 2);
+    }
+    else
+    {
+        printmsg("BL_DEBUG_MSG: checksum fail\r\n");
+        bootloader_send_nack();
+    }
+}
+
+// ============================================================================
+// 24. Read Option Byte RW Protection Status
+// ============================================================================
+uint16_t read_OB_rw_protection_status(void)
+{
+    FLASH_OBProgramInitTypeDef OBInit;
+
+    HAL_FLASH_OB_Unlock();
+    HAL_FLASHEx_OBGetConfig(&OBInit);
+    HAL_FLASH_Lock();
+
+    // WRPSector holds the nWRP bits — 1 = not protected, 0 = write protected
+    return (uint16_t)OBInit.WRPSector;
+}
+
+// ============================================================================
+// 25. Configure Flash Sector Read/Write Protection
+// ============================================================================
+uint8_t configure_flash_sector_rw_protection(uint8_t sector_details, uint8_t protection_mode, uint8_t disable)
+{
+    // FLASH_OPTCR register address (same on F401RE and F446RE)
+    volatile uint32_t *pOPTCR = (uint32_t *)0x40023C14;
+
+    if (disable)
+    {
+        // Disable all r/w protection — restore default state (all nWRP bits = 1, SPRMOD = 0)
+        HAL_FLASH_OB_Unlock();
+        while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET);
+
+        *pOPTCR &= ~(1 << 31);          // SPRMOD = 0 (write protect mode)
+        *pOPTCR |=  (0xFF << 16);       // nWRP[7:0] = 1 (no protection on all sectors)
+
+        *pOPTCR |= (1 << 1);            // Set OPTSTRT to trigger programming
+        while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET);
+
+        HAL_FLASH_OB_Lock();
+        return 0;
+    }
+
+    if (protection_mode == (uint8_t)1)
+    {
+        // Write protection only (SPRMOD = 0, clear nWRPi bits for targeted sectors)
+        HAL_FLASH_OB_Unlock();
+        while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET);
+
+        *pOPTCR &= ~(1 << 31);                  // SPRMOD = 0
+        *pOPTCR &= ~(sector_details << 16);     // Clear bits = write protect those sectors
+
+        *pOPTCR |= (1 << 1);
+        while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET);
+
+        HAL_FLASH_OB_Lock();
+    }
+    else if (protection_mode == (uint8_t)2)
+    {
+        // PCROP: read + write protection (SPRMOD = 1, set nWRPi bits for targeted sectors)
+        HAL_FLASH_OB_Unlock();
+        while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET);
+
+        *pOPTCR |=  (1 << 31);                  // SPRMOD = 1
+        *pOPTCR &= ~(0xFF << 16);               // Clear all nWRP bits first
+        *pOPTCR |=  (sector_details << 16);     // Set bits = PCROP those sectors
+
+        *pOPTCR |= (1 << 1);
+        while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET);
+
+        HAL_FLASH_OB_Lock();
+    }
+
+    return 0;
 }
 
 /* USER CODE END 4 */

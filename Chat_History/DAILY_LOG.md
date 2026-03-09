@@ -150,3 +150,23 @@ Demo:
     <!-- Trigger the binary with go to command -->
     cmd: 5
     cmd: 0x080088D0
+
+
+
+
+## SECTION 21 OPTION bUTES
+
+Demo:
+    <!-- Read Write Protection -->
+    cmd: 9
+    sector : 4 
+    Enter Sector Protection Mode: 1
+
+    <!-- READ to Check the status-->
+    cmd: 11 
+
+    <!-- Clearing the protection -->
+    cmd: 13
+
+    <!-- READ to Check the Status -->
+    cmd: 11
