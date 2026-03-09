@@ -129,6 +129,7 @@ uint16_t read_OB_rw_protection_status(void);
 
 // Flash sector base addresses
 #define FLASH_SECTOR2_BASE_ADDRESS  0x08008000U  // User app starts here
+#define FLASH_SECTOR3_BASE_ADDRESS  0x0800C000U  // User app starts here
 
 // Milestone 4: Command Framework
 #define BL_ACK              0xA5

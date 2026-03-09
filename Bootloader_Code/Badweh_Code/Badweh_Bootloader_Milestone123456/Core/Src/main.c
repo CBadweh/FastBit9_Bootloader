@@ -343,10 +343,11 @@ void bootloader_jump_to_user_app(void)
     // Function pointer to hold reset handler address
     void (*app_reset_handler)(void);
 
-    printmsg("BL_DEBUG_MSG: bootloader_jump_to_user_app\r\n");
+    printmsg("BL_DEBUG_MSG: bootloader_jump_to_user_app_2\r\n");
 
     // 1. Read the MSP value from the base address of user application (sector 2)
-    uint32_t msp_value = *(volatile uint32_t *)FLASH_SECTOR2_BASE_ADDRESS;
+    // uint32_t msp_value = *(volatile uint32_t *)FLASH_SECTOR2_BASE_ADDRESS;
+    uint32_t msp_value = *(volatile uint32_t *)FLASH_SECTOR3_BASE_ADDRESS;
 
     printmsg("BL_DEBUG_MSG: MSP value: %#x\r\n", msp_value);
 
@@ -354,7 +355,7 @@ void bootloader_jump_to_user_app(void)
     __set_MSP(msp_value);
 
     // 3. Read the reset handler address from user app (base + 4)
-    uint32_t resethandler_address = *(volatile uint32_t *)(FLASH_SECTOR2_BASE_ADDRESS + 4);
+    uint32_t resethandler_address = *(volatile uint32_t *)(FLASH_SECTOR3_BASE_ADDRESS + 4);
 
     app_reset_handler = (void*) resethandler_address;
 
