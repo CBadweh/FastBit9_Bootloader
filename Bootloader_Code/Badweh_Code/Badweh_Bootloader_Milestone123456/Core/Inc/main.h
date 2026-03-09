@@ -138,8 +138,11 @@ uint8_t verify_address(uint32_t go_address);
 #define STM32F401RE_NUM_SECTORS  6
 
 // Address validation
-#define ADDR_VALID    0x00
-#define ADDR_INVALID  0x01
+#define ADDR_VALID      0x00
+#define ADDR_INVALID    0x01
+
+// Flash erase status
+#define INVALID_SECTOR  0x04
 
 // STM32F401RE memory ranges (for verify_address)
 // F401RE has 96KB SRAM1 only — NO SRAM2 (unlike F446RE which has 112KB SRAM1 + 16KB SRAM2)

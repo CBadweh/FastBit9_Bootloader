@@ -525,7 +525,7 @@ uint8_t execute_flash_erase(uint8_t sector_number, uint8_t number_of_sector)
         if (sector_number >= STM32F401RE_NUM_SECTORS)
         {
             printmsg("BL_DEBUG_MSG: Invalid sector number: %d\r\n", sector_number);
-            return HAL_ERROR;
+            return INVALID_SECTOR;
         }
 
         // Clamp so we don't exceed sector 5
@@ -543,6 +543,7 @@ uint8_t execute_flash_erase(uint8_t sector_number, uint8_t number_of_sector)
     }
 
     flashErase_handle.VoltageRange = FLASH_VOLTAGE_RANGE_3;  // 2.7V to 3.6V
+    flashErase_handle.Banks = FLASH_BANK_1;
 
     // Unlock flash, erase, re-lock
     HAL_FLASH_Unlock();
