@@ -60,6 +60,7 @@ uint8_t supported_commands[] = {
     BL_GET_HELP,
     BL_GET_CID,
     BL_GET_RDP_STATUS,
+    BL_GO_TO_ADDR,
     BL_FLASH_ERASE
 };
 
@@ -396,6 +397,9 @@ void bootloader_uart_read_data(void)
             case BL_GET_RDP_STATUS:
                 bootloader_handle_getrdp_cmd(bl_rx_buffer);
                 break;
+            case BL_GO_TO_ADDR:
+                bootloader_handle_go_cmd(bl_rx_buffer);
+                break;
             case BL_FLASH_ERASE:
                 bootloader_handle_flash_erase_cmd(bl_rx_buffer);
                 break;
@@ -682,6 +686,73 @@ void bootloader_handle_gethelp_cmd(uint8_t *pBuffer)
         printmsg("BL_DEBUG_MSG: CRC verification success\r\n");
         bootloader_send_ack(pBuffer[1], sizeof(supported_commands));
         bootloader_uart_write_data(supported_commands, sizeof(supported_commands));
+    }
+    else
+    {
+        printmsg("BL_DEBUG_MSG: CRC verification fail\r\n");
+        bootloader_send_nack();
+    }
+}
+
+// ============================================================================
+// 17. Verify Address (for BL_GO_TO_ADDR)
+// ============================================================================
+uint8_t verify_address(uint32_t go_address)
+{
+    // F401RE: SRAM1 only (96KB), no SRAM2
+    if (go_address >= SRAM1_BASE && go_address <= SRAM1_END)
+    {
+        return ADDR_VALID;
+    }
+    else if (go_address >= FLASH_BASE && go_address <= FLASH_END)
+    {
+        return ADDR_VALID;
+    }
+    return ADDR_INVALID;
+}
+
+// ============================================================================
+// 18. Handle BL_GO_TO_ADDR Command (Command 0x55)
+// ============================================================================
+void bootloader_handle_go_cmd(uint8_t *pBuffer)
+{
+    uint32_t go_address = 0;
+    uint8_t addr_valid = ADDR_VALID;
+    uint8_t addr_invalid = ADDR_INVALID;
+
+    printmsg("BL_DEBUG_MSG: bootloader_handle_go_cmd\r\n");
+
+    uint32_t command_packet_len = bl_rx_buffer[0] + 1;
+    uint32_t host_crc = *((uint32_t *)(bl_rx_buffer + command_packet_len - 4));
+
+    if (bootloader_verify_crc(&bl_rx_buffer[0], command_packet_len - 4, host_crc) == VERIFY_CRC_SUCCESS)
+    {
+        printmsg("BL_DEBUG_MSG: CRC verification success\r\n");
+
+        bootloader_send_ack(pBuffer[1], 1);
+
+        // Extract the 4-byte go address from packet (bytes 2-5)
+        go_address = *((uint32_t *)&pBuffer[2]);
+        printmsg("BL_DEBUG_MSG: GO addr: %#x\r\n", go_address);
+
+        if (verify_address(go_address) == ADDR_VALID)
+        {
+            bootloader_uart_write_data(&addr_valid, 1);
+
+            // Make T bit = 1 for Thumb execution on Cortex-M
+            go_address += 1;
+
+            void (*lets_jump)(void) = (void *)go_address;
+
+            printmsg("BL_DEBUG_MSG: Jumping to go address!\r\n");
+
+            lets_jump();
+        }
+        else
+        {
+            printmsg("BL_DEBUG_MSG: GO addr invalid!\r\n");
+            bootloader_uart_write_data(&addr_invalid, 1);
+        }
     }
     else
     {

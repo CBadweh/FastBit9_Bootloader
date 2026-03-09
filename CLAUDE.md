@@ -111,16 +111,16 @@ Bytes N-3..N:  CRC32 (4 bytes, little-endian)
 
 Response: `0xA5 <follow_len> <data>` (ACK) or `0x7F` (NACK)
 
-| Code | Command | Status | Tested |
-|------|---------|--------|--------|
-| 0x51 | `BL_GET_VER` — returns version `0x10` | Implemented | ✓ |
-| 0x52 | `BL_GET_HELP` — returns `supported_commands[]` array | Implemented | ✓ |
-| 0x53 | `BL_GET_CID` — returns chip ID (`0x0433` on F401RE) | Implemented | ✓ |
-| 0x56 | `BL_FLASH_ERASE` — sector or mass erase | Implemented | ✓ |
-| 0x54 | `BL_GET_RDP_STATUS` | Not implemented | — |
-| 0x55 | `BL_GO_TO_ADDR` | Not implemented | — |
-| 0x57 | `BL_MEM_WRITE` | Not implemented | — |
-| 0x58 | `BL_READ_SECTOR_P_STATUS` | Not implemented | — |
+| Code | Command | Status |
+|------|---------|--------|
+| 0x51 | `BL_GET_VER` — returns version `0x10` | Done |
+| 0x52 | `BL_GET_HELP` — returns `supported_commands[]` array | Done |
+| 0x53 | `BL_GET_CID` — returns chip ID (`0x0433` on F401RE) | Done |
+| 0x54 | `BL_GET_RDP_STATUS` — returns RDP level | Done |
+| 0x56 | `BL_FLASH_ERASE` — sector or mass erase | Done |
+| 0x55 | `BL_GO_TO_ADDR` — jump to specified address | Done |
+| 0x57 | `BL_MEM_WRITE` | Not implemented |
+| 0x58 | `BL_READ_SECTOR_P_STATUS` | Not implemented |
 
 ---
 
@@ -149,6 +149,20 @@ The course uses F446RE with Keil and TeraTerm. This project uses F401RE with STM
 | Debug UART | USART3 (PC10/PC11) | **USART6 (PC6/PC7)** |
 
 All flash addresses, jump logic, VTOR offsets, and command codes are identical between boards.
+
+---
+
+## Lesson Q&A Workflow
+
+When answering questions about specific lessons or bootloader concepts:
+
+1. **Big picture first** — Read `Bootloader_Transcript/Bootloader_Claude_Summary.md` to understand where the lesson fits in the course progression and how it connects to other topics.
+
+2. **Code references use two paths:**
+   - **Source Code (truth/reference):** `Bootloader_Code/Source_Code/SourceCode/BOOTLOADER/bootloader_STM32F446xx/` — this is the course's canonical implementation. The course summary and transcripts map to this code. Guide the user here for understanding.
+   - **My Code (current progress):** `Bootloader_Code/Badweh_Code/Badweh_Bootloader_Milestone123456/` — this is the user's working implementation with F401RE adaptations. Use this to check what's already done and tested.
+
+3. **Transcripts** live in `Bootloader_Transcript/` organized by section (e.g., `S14_Implementing/`). Read the relevant transcript when deeper lesson context is needed.
 
 ---
 

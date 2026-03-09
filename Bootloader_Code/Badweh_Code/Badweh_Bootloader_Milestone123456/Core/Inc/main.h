@@ -86,6 +86,10 @@ uint16_t get_mcu_chip_id(void);
 void bootloader_handle_getrdp_cmd(uint8_t *pBuffer);
 uint8_t get_flash_rdp_level(void);
 
+// BL_GO_TO_ADDR
+void bootloader_handle_go_cmd(uint8_t *pBuffer);
+uint8_t verify_address(uint32_t go_address);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -127,10 +131,21 @@ uint8_t get_flash_rdp_level(void);
 #define BL_GET_HELP         0x52
 #define BL_GET_CID          0x53
 #define BL_GET_RDP_STATUS   0x54
+#define BL_GO_TO_ADDR       0x55
 #define BL_FLASH_ERASE      0x56
 
 // STM32F401RE: 6 sectors (0-5), not 8 like F446
 #define STM32F401RE_NUM_SECTORS  6
+
+// Address validation
+#define ADDR_VALID    0x00
+#define ADDR_INVALID  0x01
+
+// STM32F401RE memory ranges (for verify_address)
+// F401RE has 96KB SRAM1 only — NO SRAM2 (unlike F446RE which has 112KB SRAM1 + 16KB SRAM2)
+#define SRAM1_SIZE     96*1024
+#define SRAM1_END      (SRAM1_BASE + SRAM1_SIZE)
+#define FLASH_SIZE     512*1024
 
 /* USER CODE END Private defines */
 
